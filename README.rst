@@ -36,7 +36,9 @@ Basic Usage
         try:
             voxel_ndarray = dicom_numpy.combine_slices(datasets)
         except dicom_numpy.DicomImportException as e:
-            # the DICOM files are not from the same series, there are missing
-            # internal slices, or the data is inconsistent
-            pass
+            # Either the DICOM files are not from the same series, there are missing
+            # internal slices (we can't detect missing end slices), or the data
+            # is inconsistent in some way (e.g. the size of each slice is
+            # inconsistent).
+            raise
         return voxel_ndarray
