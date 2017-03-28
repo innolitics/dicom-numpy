@@ -50,7 +50,6 @@ def _merge_slice_pixel_arrays(slice_datasets):
     for k, dataset in enumerate(sorted_slice_datasets):
         voxels[:, :, k] = dataset.pixel_array.T
 
-
     if hasattr(first_dataset, 'RescaleSlope') or hasattr(first_dataset, 'RescaleIntercept'):
         slope = float(getattr(dataset, 'RescaleSlope', 1))
         intercept = float(getattr(dataset, 'RescaleIntercept', 0))
