@@ -20,12 +20,14 @@ Installation
 ------------
 
 .. code:: bash
+
     pip install dicom_numpy
 
 Basic Usage
 -----------
 
 .. code:: python
+
     import dicom
     import dicom_numpy
 
