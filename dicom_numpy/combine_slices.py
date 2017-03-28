@@ -29,20 +29,21 @@ def combine_slices(slice_datasets):
     if len(slice_datasets) == 0:
         raise DicomImportException("Must provide at least one DICOM dataset")
 
-    validate_slices_form_uniform_grid(slice_datasets)
+    _validate_slices_form_uniform_grid(slice_datasets)
 
-    voxels = merge_slice_pixel_arrays(slice_datasets)
-    transform = ijk_to_patient_xyz_transform_matrix(slice_datasets)
+    voxels = _merge_slice_pixel_arrays(slice_datasets)
+    transform = _ijk_to_patient_xyz_transform_matrix(slice_datasets)
 
     return voxels, transform
 
 
-def merge_slice_pixel_arrays(slice_datasets):
-    num_rows = slice_datasets[0].Rows
-    num_columns = slice_datasets[0].Columns
+def _merge_slice_pixel_arrays(slice_datasets):
+    first_slice_dataset = slice_datasets[0]
+    num_rows = first_slice_dataset.Rows
+    num_columns = first_slice_dataset.Columns
     num_slices = len(slice_datasets)
 
-    dtype = slice_datasets[0].pixel_array.dtype
+    dtype = first_slice_dataset.pixel_array.dtype
     voxels = np.empty((num_columns, num_rows, num_slices), dtype=dtype)
 
     sorted_slice_datasets = _sort_by_slice_spacing(slice_datasets)
@@ -57,7 +58,7 @@ def merge_slice_pixel_arrays(slice_datasets):
     return voxels
 
 
-def ijk_to_patient_xyz_transform_matrix(slice_datasets):
+def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
     first_slice_dataset = _sort_by_slice_spacing(slice_datasets)[0]
     image_orientation = first_slice_dataset.ImageOrientationPatient
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
@@ -76,7 +77,7 @@ def ijk_to_patient_xyz_transform_matrix(slice_datasets):
     return transform
 
 
-def validate_slices_form_uniform_grid(slice_datasets):
+def _validate_slices_form_uniform_grid(slice_datasets):
     '''
     Perform various data checks to ensure that the list of slices form a
     evenly-spaced grid of data.

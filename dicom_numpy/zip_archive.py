@@ -5,7 +5,7 @@ import tempfile
 import dicom
 
 from .exceptions import DicomImportException
-from .dicom_import import combine_slices
+from .combine_slices import combine_slices
 
 
 logger = logging.getLogger(__name__)
