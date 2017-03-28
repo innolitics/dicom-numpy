@@ -27,7 +27,7 @@ class TestMergeSlicePixelArrays:
         '''
         assert _merge_slice_pixel_arrays(axial_slices).dtype == np.dtype('uint16')
 
-    def test_cast_to_float_if_rescale_slope_present(self):
+    def test_casting_if_only_rescale_slope(self):
         '''
         If the `RescaleSlope` DICOM attribute is present, the
         `RescaleIntercept` attribute should also be present, however, we handle
@@ -41,6 +41,19 @@ class TestMergeSlicePixelArrays:
         voxels = _merge_slice_pixel_arrays(slices)
         assert voxels.dtype == np.dtype('float32')
         assert voxels[0, 0, 0] == 2.0
+
+    def test_casting_rescale_slope_and_intercept(self):
+        '''
+        Some DICOM modules contain the `RescaleSlope` and `RescaleIntercept` DICOM attributes.
+        '''
+        slices = [
+            MockSlice(np.ones((10, 20), dtype=np.uint8), 0, RescaleSlope=2, RescaleIntercept=3),
+            MockSlice(np.ones((10, 20), dtype=np.uint8), 1, RescaleSlope=2, RescaleIntercept=3),
+        ]
+
+        voxels = _merge_slice_pixel_arrays(slices)
+        assert voxels.dtype == np.dtype('float32')
+        assert voxels[0, 0, 0] == 5.0
 
     def test_robust_to_ordering(self, axial_slices):
         '''

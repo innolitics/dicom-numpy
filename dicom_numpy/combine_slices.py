@@ -38,32 +38,33 @@ def combine_slices(slice_datasets):
 
 
 def _merge_slice_pixel_arrays(slice_datasets):
-    first_slice_dataset = slice_datasets[0]
-    num_rows = first_slice_dataset.Rows
-    num_columns = first_slice_dataset.Columns
+    first_dataset = slice_datasets[0]
+    num_rows = first_dataset.Rows
+    num_columns = first_dataset.Columns
     num_slices = len(slice_datasets)
 
-    dtype = first_slice_dataset.pixel_array.dtype
+    dtype = first_dataset.pixel_array.dtype
     voxels = np.empty((num_columns, num_rows, num_slices), dtype=dtype)
 
     sorted_slice_datasets = _sort_by_slice_spacing(slice_datasets)
     for k, dataset in enumerate(sorted_slice_datasets):
-        try:
-            slope = float(getattr(dataset, 'RescaleSlope'))
-            intercept = float(getattr(dataset, 'RescaleIntercept'))
-            voxels[:, :, k] = dataset.pixel_array.astype(np.float32).T*slope + intercept
-        except AttributeError:
-            voxels[:, :, k] = dataset.pixel_array.T
+        voxels[:, :, k] = dataset.pixel_array.T
+
+
+    if hasattr(first_dataset, 'RescaleSlope') or hasattr(first_dataset, 'RescaleIntercept'):
+        slope = float(getattr(dataset, 'RescaleSlope', 1))
+        intercept = float(getattr(dataset, 'RescaleIntercept', 0))
+        voxels = voxels.astype(np.float32)*slope + intercept
 
     return voxels
 
 
 def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
-    first_slice_dataset = _sort_by_slice_spacing(slice_datasets)[0]
-    image_orientation = first_slice_dataset.ImageOrientationPatient
+    first_dataset = _sort_by_slice_spacing(slice_datasets)[0]
+    image_orientation = first_dataset.ImageOrientationPatient
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
 
-    row_spacing, column_spacing = first_slice_dataset.PixelSpacing
+    row_spacing, column_spacing = first_dataset.PixelSpacing
     slice_spacing = _slice_spacing(slice_datasets)
 
     transform = np.identity(4, dtype=np.float32)
@@ -72,7 +73,7 @@ def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
     transform[:3, 1] = column_cosine*row_spacing
     transform[:3, 2] = slice_cosine*slice_spacing
 
-    transform[:3, 3] = first_slice_dataset.ImagePositionPatient
+    transform[:3, 3] = first_dataset.ImagePositionPatient
 
     return transform
 
@@ -96,6 +97,8 @@ def _validate_slices_form_uniform_grid(slice_datasets):
         'BitsAllocated',
         'BitsStored',
         'HighBit',
+        'RescaleSlope',
+        'RescaleIntercept',
     ]
 
     for property_name in invariant_properties:
