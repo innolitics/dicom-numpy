@@ -44,19 +44,14 @@ def _merge_slice_pixel_arrays(slice_datasets):
     num_slices = len(slice_datasets)
 
     dtype = first_dataset.pixel_array.dtype
-    voxels = np.empty((num_columns, num_rows, num_slices), dtype=dtype)
+    voxels = np.empty((num_columns, num_rows, num_slices), dtype=np.float32)
 
     sorted_slice_datasets = _sort_by_slice_spacing(slice_datasets)
     for k, dataset in enumerate(sorted_slice_datasets):
-        voxels[:, :, k] = dataset.pixel_array.T
-
-    if hasattr(first_dataset, 'RescaleSlope') or hasattr(first_dataset, 'RescaleIntercept'):
         slope = float(getattr(dataset, 'RescaleSlope', 1))
         intercept = float(getattr(dataset, 'RescaleIntercept', 0))
-        voxels = voxels.astype(np.float32)*slope + intercept
-
+        voxels[:, :, k] = dataset.pixel_array.T.astype(np.float32) * slope + intercept
     return voxels
-
 
 def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
     first_dataset = _sort_by_slice_spacing(slice_datasets)[0]
@@ -96,8 +91,6 @@ def _validate_slices_form_uniform_grid(slice_datasets):
         'BitsAllocated',
         'BitsStored',
         'HighBit',
-        'RescaleSlope',
-        'RescaleIntercept',
     ]
 
     for property_name in invariant_properties:

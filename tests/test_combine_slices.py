@@ -21,12 +21,6 @@ class TestCombineSlices:
 
 
 class TestMergeSlicePixelArrays:
-    def test_dtype_preserved_if_no_scaling(self, axial_slices):
-        '''
-        Integer DICOM pixel data should retain its type.
-        '''
-        assert _merge_slice_pixel_arrays(axial_slices).dtype == np.dtype('uint16')
-
     def test_casting_if_only_rescale_slope(self):
         '''
         If the `RescaleSlope` DICOM attribute is present, the
