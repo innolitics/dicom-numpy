@@ -1,10 +1,11 @@
-import math
 import zipfile
 import logging
 import tempfile
 
 import dicom
 import numpy as np
+
+from .utils import isclose
 
 
 logger = logging.getLogger(__name__)
@@ -182,11 +183,11 @@ def _validate_image_orientation(image_orientation):
 
 
 def _almost_zero(value, abs_tol):
-    return math.isclose(value, 0.0, abs_tol=abs_tol)
+    return isclose(value, 0.0, abs_tol=abs_tol)
 
 
 def _almost_one(value, abs_tol):
-    return math.isclose(value, 1.0, abs_tol=abs_tol)
+    return isclose(value, 1.0, abs_tol=abs_tol)
 
 
 def _extract_cosines(image_orientation):
