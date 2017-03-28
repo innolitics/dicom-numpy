@@ -12,7 +12,7 @@ This python module provides utilities for extracting image data contained in DIC
 Dependencies
 ------------
 
-- Python 2.7 or Python 3.3+
+- Python 2.7 or Python 3.4+
 - Numpy
 - PyDicom
 
