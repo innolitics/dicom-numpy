@@ -12,7 +12,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='dicom-numpy',
+    name='dicom_numpy',
     version='0.1.0',
     description='Extract image data into a 3D numpy array from a set of DICOM files.',
     long_description=long_description,
@@ -24,7 +24,7 @@ setup(
         'Development Status :: 1 - Planning',
 
         'Intended Audience :: Developers',
-	'Intended Audience :: Healthcare Industry',
+        'Intended Audience :: Healthcare Industry',
         'Topic :: Software Development :: Build Tools',
         'Topic :: Scientific/Engineering :: Medical Science Apps.',
 

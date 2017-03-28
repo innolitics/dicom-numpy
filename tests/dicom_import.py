@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from .dicom_import import (
+from dicom_numpy.dicom_import import (
     combine_slices,
     validate_slices_form_uniform_grid,
     merge_slice_pixel_arrays,
@@ -17,6 +17,7 @@ negative_y_cos = (0, -1, 0)
 negative_z_cos = (0, 0, -1)
 
 arbitrary_shape = (10, 11)
+
 
 class MockSlice:
     '''
@@ -73,7 +74,6 @@ class TestMergeSlicePixelArrays:
         Integer DICOM pixel data should retain its type.
         '''
         assert merge_slice_pixel_arrays(axial_slices).dtype == np.dtype('uint16')
-
 
     def test_robust_to_ordering(self, axial_slices):
         '''
