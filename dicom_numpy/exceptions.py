@@ -1,0 +1,2 @@
+class DicomImportException(Exception):
+    pass
