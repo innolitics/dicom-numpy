@@ -12,19 +12,47 @@ logger = logging.getLogger(__name__)
 def combine_slices(slice_datasets):
     '''
     Given a list of pydicom datasets for an image series, stitch them together into a
-    three-dimensional numpy array.  Also return a 4x4 affine transformation
+    three-dimensional numpy array.  Also calculate a 4x4 affine transformation
     matrix that converts the ijk-pixel-indices into the xyz-coordinates in the
-    patient's coordinate system.
-    See http://dicom.innolitics.com/ciods/ct-image/image-plane for details.
-    This matrix, M, should fulfill:
-    [x, y, z, 1].T = M @ [i, j, k, 1].T
-    The pixel array will be cast to floating point values.
-    This function requires that the datasets fulfill these properties:
-    - Are all part of the same series (0020,000E)
-    - The set of slices provided has no internal "gaps"; note that missing
-      slices on the ends of the dataset are not detected
-    - The size of each slice and the spacing between the pixels in the slice
-      must be the same (0020,0032)
+    DICOM patient's coordinate system.
+
+    Returns a two-tuple containing the 3D-ndarray and the affine matrix.
+
+    The image array dtype will be preserved unless the cast to floating point
+    if any of the DICOM images contain either the `Rescale Slope
+    <https://dicom.innolitics.com/ciods/ct-image/ct-image/00281053>`_ or the
+    `Rescale Intercept <https://dicom.innolitics.com/ciods/ct-image/ct-image/00281052>`_
+    attributes.
+
+    This function requires that the datasets:
+
+    - Be in same series (have the same `Series Instance UID <https://dicom.innolitics.com/ciods/ct-image/general-series/0020000e>`_,
+      `Modality <https://dicom.innolitics.com/ciods/ct-image/general-series/00080060>`_,
+      and `SOP Class UID <https://dicom.innolitics.com/ciods/ct-image/sop-common/00080016>`_).
+    - The binary storage of each slice must be the same (have the same 
+      `Bits Allocated <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280100>`_,
+      `Bits Stored <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280101>`_,
+      `High Bit <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280102>`_, and
+      `Pixel Representation <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280103>`_).
+    - The image slice must approximately form a grid. This means there can not
+      be any missing internal slices (missing slices on the ends of the dataset
+      are not detected).
+    - It also means that  each slice must have the same
+      `Rows <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280010>`_,
+      `Columns <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280011>`_,
+      `Pixel Spacing <https://dicom.innolitics.com/ciods/ct-image/image-plane/00280030>`_, and
+      `Image Orientation (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200037>`_
+      attribute values. 
+    - The direction cosines derived from the
+      `Image Orientation (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200037>`_
+      attribute must, within 1e-4, have a magnitude of 1.  The cosines must
+      also be approximately perpendicular (their dot-product must be within
+      1e-4 of 0).  Warnings are displayed if any of theseapproximations are
+      below 1e-8, however, since we have seen real datasets with values up to
+      1e-4, we let them pass.
+    - The `Image Position (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200032>`_ values must approximately form a line.
+
+    If any of these conditions are not met, a `dicom_numpy.DicomImportException` is raised.
     '''
     if len(slice_datasets) == 0:
         raise DicomImportException("Must provide at least one DICOM dataset")
@@ -118,7 +146,6 @@ def _validate_image_orientation(image_orientation):
     Ensure that the image orientation is supported
     - The direction cosines have magnitudes of 1 (just in case)
     - The direction cosines are perpendicular
-    - The direction cosines are oriented along the patient coordinate system's axes
     '''
     # TODO: deduplicate this
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
