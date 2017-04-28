@@ -42,3 +42,18 @@ Basic Usage
             # inconsistent).
             raise
         return voxel_ndarray
+
+Tests
+-----
+
+Run all of the tests for each supported python version using:
+
+.. code:: bash
+
+    tox
+
+Run all of the tests for the currently active python version using:
+
+.. code:: bash
+
+    pytest
