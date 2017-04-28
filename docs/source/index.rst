@@ -88,13 +88,8 @@ Run all of the tests for the currently active python version using:
     pytest
 
 
-Licenses
-========
-
-.. include:: ../../LICENSE.txt
-
-Contact Us
-==========
+About Innolitics
+================
 
 Innolitics is a team of talented software developers with medical and
 engineering backgrounds.  We help companies produce top quality medical imaging
@@ -103,6 +98,12 @@ Standard Browser <https://dicom.innolitics.com>`_ may be useful to you.
 
 If you could use help with DICOM, `let us know <http://innolitics.com/#contact>`_!  We offer training sessions and
 can provide advice or development services.
+
+
+Licenses
+========
+
+.. include:: ../../LICENSE.txt
 
 Indices and tables
 ==================
