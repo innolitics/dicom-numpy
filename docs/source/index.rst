@@ -12,6 +12,10 @@ This documentation is a work in progress.
 
    license
 
+.. automodule:: dicom_numpy
+
+.. autofunction:: dicom_numpy.combine_slices
+
 Indices and tables
 ==================
 
