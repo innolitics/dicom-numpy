@@ -6,7 +6,9 @@ This python module provides a set of utilities for extracting data contained in
 DICOM files into Numpy ndarrays.  It is a higher-level library that builds on the excellent lower-level `pydicom
 <http://pydicom.readthedocs.io/en/stable/>`_ library.
 
-The library is quite small at the moment, however, if you have a DICOM-related utility function that you think would be appropriate to include, create a Github Issue!
+The library is quite small at the moment, however, if you have a DICOM-related
+utility function that you think would be appropriate to include, create a
+Github Issue!
 
 Dependencies
 ============
@@ -22,6 +24,12 @@ Installation
 .. code:: bash
 
     pip install dicom_numpy
+
+
+Source Code
+===========
+
+The source code is hosted on `Github <https://github.com/innolitics/dicom-numpy>`_.
 
 
 Combine DICOM Slices
