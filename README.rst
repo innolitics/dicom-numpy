@@ -1,4 +1,5 @@
 .. image:: https://travis-ci.org/innolitics/dicom-numpy.svg?branch=master
+   :target: https://travis-ci.org/innolitics/dicom-numpy
 
 ===========
 DICOM Numpy
