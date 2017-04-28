@@ -43,15 +43,26 @@ def _merge_slice_pixel_arrays(slice_datasets):
     num_columns = first_dataset.Columns
     num_slices = len(slice_datasets)
 
-    dtype = first_dataset.pixel_array.dtype
-    voxels = np.empty((num_columns, num_rows, num_slices), dtype=np.float32)
-
     sorted_slice_datasets = _sort_by_slice_spacing(slice_datasets)
-    for k, dataset in enumerate(sorted_slice_datasets):
-        slope = float(getattr(dataset, 'RescaleSlope', 1))
-        intercept = float(getattr(dataset, 'RescaleIntercept', 0))
-        voxels[:, :, k] = dataset.pixel_array.T.astype(np.float32) * slope + intercept
+
+    if any(_requires_rescaling(d) for d in sorted_slice_datasets):
+        voxels = np.empty((num_columns, num_rows, num_slices), dtype=np.float32)
+        for k, dataset in enumerate(sorted_slice_datasets):
+            slope = float(getattr(dataset, 'RescaleSlope', 1))
+            intercept = float(getattr(dataset, 'RescaleIntercept', 0))
+            voxels[:, :, k] = dataset.pixel_array.T.astype(np.float32)*slope + intercept
+    else:
+        dtype = first_dataset.pixel_array.dtype
+        voxels = np.empty((num_columns, num_rows, num_slices), dtype=dtype)
+        for k, dataset in enumerate(sorted_slice_datasets):
+            voxels[:, :, k] = dataset.pixel_array.T
+
     return voxels
+
+
+def _requires_rescaling(dataset):
+    return hasattr(dataset, 'RescaleSlope') or hasattr(dataset, 'RescaleIntercept')
+
 
 def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
     first_dataset = _sort_by_slice_spacing(slice_datasets)[0]
