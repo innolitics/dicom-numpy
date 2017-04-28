@@ -48,7 +48,7 @@ setup(
     ],
 
     extras_require={
-        'dev': ['check-manifest'],
+        'dev': ['check-manifest', 'sphinx', 'sphinx-autobuild'],
         'test': ['coverage'],
     },
 
