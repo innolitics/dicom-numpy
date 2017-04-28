@@ -152,6 +152,3 @@ texinfo_documents = [
      author, 'DICOM-Numpy', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-

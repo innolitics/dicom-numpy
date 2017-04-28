@@ -26,10 +26,11 @@ def combine_slices(slice_datasets):
 
     This function requires that the datasets:
 
-    - Be in same series (have the same `Series Instance UID <https://dicom.innolitics.com/ciods/ct-image/general-series/0020000e>`_,
+    - Be in same series (have the same
+      `Series Instance UID <https://dicom.innolitics.com/ciods/ct-image/general-series/0020000e>`_,
       `Modality <https://dicom.innolitics.com/ciods/ct-image/general-series/00080060>`_,
       and `SOP Class UID <https://dicom.innolitics.com/ciods/ct-image/sop-common/00080016>`_).
-    - The binary storage of each slice must be the same (have the same 
+    - The binary storage of each slice must be the same (have the same
       `Bits Allocated <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280100>`_,
       `Bits Stored <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280101>`_,
       `High Bit <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280102>`_, and
@@ -42,7 +43,7 @@ def combine_slices(slice_datasets):
       `Columns <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280011>`_,
       `Pixel Spacing <https://dicom.innolitics.com/ciods/ct-image/image-plane/00280030>`_, and
       `Image Orientation (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200037>`_
-      attribute values. 
+      attribute values.
     - The direction cosines derived from the
       `Image Orientation (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200037>`_
       attribute must, within 1e-4, have a magnitude of 1.  The cosines must
@@ -50,7 +51,8 @@ def combine_slices(slice_datasets):
       1e-4 of 0).  Warnings are displayed if any of theseapproximations are
       below 1e-8, however, since we have seen real datasets with values up to
       1e-4, we let them pass.
-    - The `Image Position (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200032>`_ values must approximately form a line.
+    - The `Image Position (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200032>`_
+      values must approximately form a line.
 
     If any of these conditions are not met, a `dicom_numpy.DicomImportException` is raised.
     '''
