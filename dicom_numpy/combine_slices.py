@@ -18,11 +18,12 @@ def combine_slices(slice_datasets):
 
     Returns a two-tuple containing the 3D-ndarray and the affine matrix.
 
-    The image array dtype will be preserved unless the cast to floating point
-    if any of the DICOM images contain either the `Rescale Slope
+    The image array dtype will be preserved, unless any of the DICOM images
+    contain either the `Rescale Slope
     <https://dicom.innolitics.com/ciods/ct-image/ct-image/00281053>`_ or the
     `Rescale Intercept <https://dicom.innolitics.com/ciods/ct-image/ct-image/00281052>`_
-    attributes.
+    attributes.  If either of these attributes are present, they will be
+    applied to each slice individually.
 
     This function requires that the datasets:
 
