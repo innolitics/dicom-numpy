@@ -156,17 +156,17 @@ def _validate_image_orientation(image_orientation):
     if not _almost_zero(np.dot(row_cosine, column_cosine), 1e-4):
         raise DicomImportException("Non-orthogonal direction cosines: {}, {}".format(row_cosine, column_cosine))
     elif not _almost_zero(np.dot(row_cosine, column_cosine), 1e-8):
-        logger.warn("Direction cosines aren't quite orthogonal: {}, {}".format(row_cosine, column_cosine))
+        logger.warning("Direction cosines aren't quite orthogonal: {}, {}".format(row_cosine, column_cosine))
 
     if not _almost_one(np.linalg.norm(row_cosine), 1e-4):
         raise DicomImportException("The row direction cosine's magnitude is not 1: {}".format(row_cosine))
     elif not _almost_one(np.linalg.norm(row_cosine), 1e-8):
-        logger.warn("The row direction cosine's magnitude is not quite 1: {}".format(row_cosine))
+        logger.warning("The row direction cosine's magnitude is not quite 1: {}".format(row_cosine))
 
     if not _almost_one(np.linalg.norm(column_cosine), 1e-4):
         raise DicomImportException("The column direction cosine's magnitude is not 1: {}".format(column_cosine))
     elif not _almost_one(np.linalg.norm(column_cosine), 1e-8):
-        logger.warn("The column direction cosine's magnitude is not quite 1: {}".format(column_cosine))
+        logger.warning("The column direction cosine's magnitude is not quite 1: {}".format(column_cosine))
 
 
 def _almost_zero(value, abs_tol):
