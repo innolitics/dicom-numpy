@@ -9,7 +9,7 @@ from .exceptions import DicomImportException
 logger = logging.getLogger(__name__)
 
 
-def combine_slices(slice_datasets):
+def combine_slices(slice_datasets, rescale=None):
     '''
     Given a list of pydicom datasets for an image series, stitch them together into a
     three-dimensional numpy array.  Also calculate a 4x4 affine transformation
@@ -18,12 +18,18 @@ def combine_slices(slice_datasets):
 
     Returns a two-tuple containing the 3D-ndarray and the affine matrix.
 
-    The image array dtype will be preserved, unless any of the DICOM images
-    contain either the `Rescale Slope
+    If `rescale` is set to `None` (the default), then the image array dtype
+    will be preserved, unless any of the DICOM images contain either the
+    `Rescale Slope
     <https://dicom.innolitics.com/ciods/ct-image/ct-image/00281053>`_ or the
     `Rescale Intercept <https://dicom.innolitics.com/ciods/ct-image/ct-image/00281052>`_
     attributes.  If either of these attributes are present, they will be
     applied to each slice individually.
+
+    If `rescale` is `True` the voxels will be cast to `float32`, if set to
+    `False`, the original dtype will be preserved even if DICOM rescaling information is present.
+
+    The returned array has the column-major byte-order.
 
     This function requires that the datasets:
 
@@ -62,13 +68,13 @@ def combine_slices(slice_datasets):
 
     _validate_slices_form_uniform_grid(slice_datasets)
 
-    voxels = _merge_slice_pixel_arrays(slice_datasets)
+    voxels = _merge_slice_pixel_arrays(slice_datasets, rescale)
     transform = _ijk_to_patient_xyz_transform_matrix(slice_datasets)
 
     return voxels, transform
 
 
-def _merge_slice_pixel_arrays(slice_datasets):
+def _merge_slice_pixel_arrays(slice_datasets, rescale=None):
     first_dataset = slice_datasets[0]
     num_rows = first_dataset.Rows
     num_columns = first_dataset.Columns
@@ -76,15 +82,18 @@ def _merge_slice_pixel_arrays(slice_datasets):
 
     sorted_slice_datasets = _sort_by_slice_spacing(slice_datasets)
 
-    if any(_requires_rescaling(d) for d in sorted_slice_datasets):
-        voxels = np.empty((num_columns, num_rows, num_slices), dtype=np.float32)
+    if rescale is None:
+        rescale = any(_requires_rescaling(d) for d in sorted_slice_datasets)
+
+    if rescale:
+        voxels = np.empty((num_columns, num_rows, num_slices), dtype=np.float32, order='F')
         for k, dataset in enumerate(sorted_slice_datasets):
             slope = float(getattr(dataset, 'RescaleSlope', 1))
             intercept = float(getattr(dataset, 'RescaleIntercept', 0))
-            voxels[:, :, k] = dataset.pixel_array.T.astype(np.float32)*slope + intercept
+            voxels[:, :, k] = dataset.pixel_array.T.astype(np.float32) * slope + intercept
     else:
         dtype = first_dataset.pixel_array.dtype
-        voxels = np.empty((num_columns, num_rows, num_slices), dtype=dtype)
+        voxels = np.empty((num_columns, num_rows, num_slices), dtype=dtype, order='F')
         for k, dataset in enumerate(sorted_slice_datasets):
             voxels[:, :, k] = dataset.pixel_array.T
 
@@ -105,9 +114,9 @@ def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
 
     transform = np.identity(4, dtype=np.float32)
 
-    transform[:3, 0] = row_cosine*column_spacing
-    transform[:3, 1] = column_cosine*row_spacing
-    transform[:3, 2] = slice_cosine*slice_spacing
+    transform[:3, 0] = row_cosine * column_spacing
+    transform[:3, 1] = column_cosine * row_spacing
+    transform[:3, 2] = slice_cosine * slice_spacing
 
     transform[:3, 3] = first_dataset.ImagePositionPatient
 

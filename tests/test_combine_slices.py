@@ -5,7 +5,6 @@ from dicom_numpy.combine_slices import (
     combine_slices,
     _validate_slices_form_uniform_grid,
     _merge_slice_pixel_arrays,
-
 )
 
 from dicom_numpy.exceptions import DicomImportException
@@ -63,6 +62,16 @@ class TestMergeSlicePixelArrays:
             _merge_slice_pixel_arrays([axial_slices[0], axial_slices[1], axial_slices[2]]),
             _merge_slice_pixel_arrays([axial_slices[2], axial_slices[0], axial_slices[1]])
         )
+
+    def test_rescales_if_forced_true(self):
+        slice_datasets = [MockSlice(np.ones((10, 20), dtype=np.uint8), 0)]
+        voxels = _merge_slice_pixel_arrays(slice_datasets, rescale=True)
+        assert voxels.dtype == np.float32
+
+    def test_no_rescale_if_forced_false(self):
+        slice_datasets = [MockSlice(np.ones((10, 20), dtype=np.uint8), 0, RescaleSlope=2, RescaleIntercept=3)]
+        voxels = _merge_slice_pixel_arrays(slice_datasets, rescale=False)
+        assert voxels.dtype == np.uint8
 
 
 class TestValidateSlicesFormUniformGrid:
