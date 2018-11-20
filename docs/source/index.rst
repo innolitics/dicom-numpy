@@ -67,6 +67,16 @@ Details
 .. autofunction:: dicom_numpy.combine_slices
 
 
+Change Log
+==========
+
+Version 1.5
+-----------
+
+- Added the `rescale` option to `combine_slices`
+- Made `combine_slices`'s returned ndarray use column-major ordering
+
+
 Contributing
 ============
 
