@@ -83,6 +83,19 @@ class TestValidateSlicesFormUniformGrid:
         with pytest.raises(DicomImportException):
             _validate_slices_form_uniform_grid([axial_slices[0], axial_slices[2], axial_slices[3]])
 
+    def test_insignificant_difference_in_direction_cosines(self, axial_slices):
+        '''
+        We have seen DICOM series in the field where slices have lightly
+        different direction cosines.
+        '''
+        axial_slices[0].ImageOrientationPatient[0] += 1e-6
+        _validate_slices_form_uniform_grid(axial_slices)
+
+    def test_significant_difference_in_direction_cosines(self, axial_slices):
+        axial_slices[0].ImageOrientationPatient[0] += 1e-4
+        with pytest.raises(DicomImportException):
+            _validate_slices_form_uniform_grid(axial_slices)
+
     def test_slices_from_different_series(self, axial_slices):
         '''
         As a sanity check, slices that don't come from the same DICOM series should

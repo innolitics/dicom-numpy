@@ -55,7 +55,7 @@ def combine_slices(slice_datasets, rescale=None):
       `Image Orientation (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200037>`_
       attribute must, within 1e-4, have a magnitude of 1.  The cosines must
       also be approximately perpendicular (their dot-product must be within
-      1e-4 of 0).  Warnings are displayed if any of theseapproximations are
+      1e-4 of 0).  Warnings are displayed if any of these approximations are
       below 1e-8, however, since we have seen real datasets with values up to
       1e-4, we let them pass.
     - The `Image Position (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200032>`_
@@ -136,7 +136,6 @@ def _validate_slices_form_uniform_grid(slice_datasets):
         'SeriesInstanceUID',
         'Rows',
         'Columns',
-        'ImageOrientationPatient',
         'PixelSpacing',
         'PixelRepresentation',
         'BitsAllocated',
@@ -148,6 +147,7 @@ def _validate_slices_form_uniform_grid(slice_datasets):
         _slice_attribute_equal(slice_datasets, property_name)
 
     _validate_image_orientation(slice_datasets[0].ImageOrientationPatient)
+    _slice_ndarray_attribute_almost_equal(slice_datasets, 'ImageOrientationPatient', 1e-5)
 
     slice_positions = _slice_positions(slice_datasets)
     _check_for_missing_slices(slice_positions)
@@ -159,7 +159,6 @@ def _validate_image_orientation(image_orientation):
     - The direction cosines have magnitudes of 1 (just in case)
     - The direction cosines are perpendicular
     '''
-    # TODO: deduplicate this
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
 
     if not _almost_zero(np.dot(row_cosine, column_cosine), 1e-4):
@@ -200,6 +199,15 @@ def _slice_attribute_equal(slice_datasets, property_name):
         if value != initial_value:
             msg = 'All slices must have the same value for "{}": {} != {}'
             raise DicomImportException(msg.format(property_name, value, initial_value))
+
+
+def _slice_ndarray_attribute_almost_equal(slice_datasets, property_name, abs_tol):
+    initial_value = getattr(slice_datasets[0], property_name, None)
+    for dataset in slice_datasets[1:]:
+        value = getattr(dataset, property_name, None)
+        if not np.allclose(value, initial_value, atol=abs_tol):
+            msg = 'All slices must have the same value for "{}" within "{}": {} != {}'
+            raise DicomImportException(msg.format(property_name, abs_tol, value, initial_value))
 
 
 def _slice_positions(slice_datasets):
