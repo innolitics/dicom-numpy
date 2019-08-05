@@ -15,7 +15,7 @@ class TestCombineSlices:
     def test_simple_axial_set(self, axial_slices):
         combined, _ = combine_slices(axial_slices[0:2])
 
-        manually_combined = np.dstack((axial_slices[0].pixel_array.T, axial_slices[1].pixel_array.T))
+        manually_combined = np.dstack((axial_slices[1].pixel_array.T, axial_slices[0].pixel_array.T))
         assert np.array_equal(combined, manually_combined)
 
 
