@@ -13,7 +13,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='dicom_numpy',
-    version='0.1.6',
+    version='0.2.0',
     description='Extract image data into a 3D numpy array from a set of DICOM files.',
     long_description=long_description,
     url='https://github.com/innolitics/dicom-numpy',

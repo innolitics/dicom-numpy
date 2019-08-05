@@ -76,6 +76,12 @@ Version 1.5
 - Added the `rescale` option to `combine_slices`
 - Made `combine_slices`'s returned ndarray use column-major ordering
 
+Version 2.0
+-----------
+
+- Changed the behavior of `combine_slices` to stack slices from head (slice 0)
+  to foot (slice -1). Note that this is the reverse of the behavior in v1.*.
+
 
 Contributing
 ============
