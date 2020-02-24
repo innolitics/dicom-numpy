@@ -1,0 +1,24 @@
+Data in test_dicom.zip comes from the C4KC-KiTS dataset of The Cancer Imaging
+Archive (TCIA) and is licensed under Creative Commons Attribution 3.0 Unported
+License (https://creativecommons.org/licenses/by/3.0/)
+
+The zip file contains a very small subset of the data in this study and is
+intended to be used only for the purposes of testing dicom-numpy functionality.
+
+Please see the following citations for more information:
+
+Data Citation
+
+Heller, N., Sathianathen, N., Kalapara, A., Walczak, E., Moore, K., Kaluzniak,
+H., Rosenberg, J., Blake, P., Rengel, Z., Oestreich, M., Dean, J., Tradewell,
+M., Shah, A., Tejpaul, R., Edgerton, Z., Peterson, M., Raza, S., Regmi, S.,
+Papanikolopoulos, N., Weight, C.  Data from C4KC-KiTS [Data set]. The Cancer
+Imaging Archive.  10.7937/TCIA.2019.IX49E8NX
+
+TCIA Citation
+
+Clark K, Vendt B, Smith K, Freymann J, Kirby J, Koppel P, Moore S, Phillips S,
+Maffitt D, Pringle M, Tarbox L, Prior F. The Cancer Imaging Archive (TCIA):
+Maintaining and Operating a Public Information Repository, Journal of Digital
+Imaging, Volume 26, Number 6, December, 2013, pp 1045-1057. DOI:
+10.1007/s10278-013-9622-7
