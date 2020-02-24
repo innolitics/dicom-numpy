@@ -238,4 +238,4 @@ def _slice_spacing(slice_datasets):
 
 def _sort_by_slice_spacing(slice_datasets):
     slice_spacing = _slice_positions(slice_datasets)
-    return [d for (s, d) in sorted(zip(slice_spacing, slice_datasets), reverse=True)]
+    return [d for (s, d) in sorted(zip(slice_spacing, slice_datasets))]
