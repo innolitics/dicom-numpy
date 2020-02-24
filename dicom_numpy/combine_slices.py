@@ -80,7 +80,7 @@ def _merge_slice_pixel_arrays(slice_datasets, rescale=None):
     num_columns = first_dataset.Columns
     num_slices = len(slice_datasets)
 
-    sorted_slice_datasets = _sort_by_slice_spacing(slice_datasets)
+    sorted_slice_datasets = _sort_by_slice_position(slice_datasets)
 
     if rescale is None:
         rescale = any(_requires_rescaling(d) for d in sorted_slice_datasets)
@@ -105,7 +105,7 @@ def _requires_rescaling(dataset):
 
 
 def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
-    first_dataset = _sort_by_slice_spacing(slice_datasets)[0]
+    first_dataset = _sort_by_slice_position(slice_datasets)[0]
     image_orientation = first_dataset.ImageOrientationPatient
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
 
@@ -236,6 +236,6 @@ def _slice_spacing(slice_datasets):
         return 0.0
 
 
-def _sort_by_slice_spacing(slice_datasets):
-    slice_spacing = _slice_positions(slice_datasets)
-    return [d for (s, d) in sorted(zip(slice_spacing, slice_datasets))]
+def _sort_by_slice_position(slice_datasets):
+    slice_positions = _slice_positions(slice_datasets)
+    return [d for (s, d) in sorted(zip(slice_positions, slice_datasets))]
