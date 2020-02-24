@@ -82,6 +82,12 @@ Version 2.0
 - Changed the behavior of `combine_slices` to stack slices from head (slice 0)
   to foot (slice -1). Note that this is the reverse of the behavior in v1.*.
 
+Version 3.0
+-----------
+
+- Reverted slice ordering change from v2.0, since the DICOM standard defines
+  the Z-axis direction to be increasing in the direction of the head.
+- Added support for both PyDicom 0.X and 1.X
 
 Contributing
 ============
