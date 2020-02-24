@@ -21,7 +21,7 @@ setup(
     author_email='info@innolitics.com',
     license='MIT',
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 5 - Production/Stable',
 
         'Intended Audience :: Developers',
         'Intended Audience :: Healthcare Industry',
