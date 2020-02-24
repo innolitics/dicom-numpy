@@ -2,7 +2,10 @@ import zipfile
 import logging
 import tempfile
 
-import dicom
+try:
+    import pydicom as dicom
+except ImportError:
+    import dicom
 
 from .exceptions import DicomImportException
 from .combine_slices import combine_slices
