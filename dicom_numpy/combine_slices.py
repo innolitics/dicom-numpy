@@ -234,7 +234,13 @@ def _slice_spacing(slice_datasets):
         slice_positions_diffs = np.diff(sorted(slice_positions))
         return np.mean(slice_positions_diffs)
     else:
-        return 0.0
+        dataset = slice_datasets[0]
+        if hasattr(dataset, 'SliceThickness'):
+            return dataset.SliceThickness
+        elif hasattr(dataset, 'SpacingBetweenSlices'):
+            return dataset.SpacingBetweenSlices
+        else:
+            return 0.0
 
 
 def _sort_by_slice_position(slice_datasets):
