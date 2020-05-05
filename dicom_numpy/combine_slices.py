@@ -217,14 +217,15 @@ def _slice_positions(slice_datasets):
 
 
 def _check_for_missing_slices(slice_positions):
-    slice_positions_diffs = np.diff(sorted(slice_positions))
-    if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-5):
-        # TODO: figure out how we should handle non-even slice spacing
-        msg = "The slice spacing is non-uniform. Slice spacings:\n{}"
-        logger.warning(msg.format(slice_positions_diffs))
+    if len(slice_positions) > 1:
+        slice_positions_diffs = np.diff(sorted(slice_positions))
+        if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-5):
+            # TODO: figure out how we should handle non-even slice spacing
+            msg = "The slice spacing is non-uniform. Slice spacings:\n{}"
+            logger.warning(msg.format(slice_positions_diffs))
 
-    if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-1):
-        raise DicomImportException('It appears there are missing slices')
+        if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-1):
+            raise DicomImportException('It appears there are missing slices')
 
 
 def _slice_spacing(slice_datasets):
