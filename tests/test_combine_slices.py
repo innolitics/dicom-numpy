@@ -18,6 +18,19 @@ class TestCombineSlices:
         manually_combined = np.dstack((axial_slices[0].pixel_array.T, axial_slices[1].pixel_array.T))
         assert np.array_equal(combined, manually_combined)
 
+    def test_single_slice(self, axial_slices):
+        dataset = axial_slices[-1]
+        array, _ = combine_slices([dataset])
+        assert np.array_equal(array, dataset.pixel_array.T[:, :, None])
+
+    def test_single_slice_spacing(self, axial_slices):
+        slice_spacing = 0.65
+        dataset = axial_slices[0]
+        dataset.SpacingBetweenSlices = slice_spacing
+        array, affine = combine_slices([dataset])
+        assert (np.isclose(np.linalg.norm(affine[:, 2]), np.abs(slice_spacing)) and
+                np.array_equal(array, dataset.pixel_array.T[:, :, None]))
+
 
 class TestMergeSlicePixelArrays:
     def test_casting_if_only_rescale_slope(self):
