@@ -6,7 +6,6 @@ from dicom_numpy.combine_slices import (
     _validate_slices_form_uniform_grid,
     _merge_slice_pixel_arrays,
 )
-
 from dicom_numpy.exceptions import DicomImportException
 from .conftest import MockSlice
 
@@ -28,8 +27,8 @@ class TestCombineSlices:
         dataset = axial_slices[0]
         dataset.SpacingBetweenSlices = slice_spacing
         array, affine = combine_slices([dataset])
-        assert (np.isclose(np.linalg.norm(affine[:, 2]), np.abs(slice_spacing)) and
-                np.array_equal(array, dataset.pixel_array.T[:, :, None]))
+        assert np.array_equal(array, dataset.pixel_array.T[:, :, None])
+        assert np.isclose(np.linalg.norm(affine[:, 2]), np.abs(slice_spacing))
 
 
 class TestMergeSlicePixelArrays:
