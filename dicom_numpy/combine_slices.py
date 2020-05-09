@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def combine_slices(slice_datasets, rescale=None):
-    '''
+    """
     Given a list of pydicom datasets for an image series, stitch them together into a
     three-dimensional numpy array.  Also calculate a 4x4 affine transformation
     matrix that converts the ijk-pixel-indices into the xyz-coordinates in the
@@ -62,7 +62,7 @@ def combine_slices(slice_datasets, rescale=None):
       values must approximately form a line.
 
     If any of these conditions are not met, a `dicom_numpy.DicomImportException` is raised.
-    '''
+    """
     if len(slice_datasets) == 0:
         raise DicomImportException("Must provide at least one DICOM dataset")
 
@@ -124,12 +124,12 @@ def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
 
 
 def _validate_slices_form_uniform_grid(slice_datasets):
-    '''
+    """
     Perform various data checks to ensure that the list of slices form a
     evenly-spaced grid of data.
     Some of these checks are probably not required if the data follows the
     DICOM specification, however it seems pertinent to check anyway.
-    '''
+    """
     invariant_properties = [
         'Modality',
         'SOPClassUID',
@@ -154,11 +154,11 @@ def _validate_slices_form_uniform_grid(slice_datasets):
 
 
 def _validate_image_orientation(image_orientation):
-    '''
+    """
     Ensure that the image orientation is supported
     - The direction cosines have magnitudes of 1 (just in case)
     - The direction cosines are perpendicular
-    '''
+    """
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
 
     if not _almost_zero(np.dot(row_cosine, column_cosine), 1e-4):
