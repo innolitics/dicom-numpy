@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def combine_slices(slice_datasets, rescale=None):
-    '''
+    """
     Given a list of pydicom datasets for an image series, stitch them together into a
     three-dimensional numpy array.  Also calculate a 4x4 affine transformation
     matrix that converts the ijk-pixel-indices into the xyz-coordinates in the
@@ -62,7 +62,7 @@ def combine_slices(slice_datasets, rescale=None):
       values must approximately form a line.
 
     If any of these conditions are not met, a `dicom_numpy.DicomImportException` is raised.
-    '''
+    """
     if len(slice_datasets) == 0:
         raise DicomImportException("Must provide at least one DICOM dataset")
 
@@ -124,12 +124,12 @@ def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
 
 
 def _validate_slices_form_uniform_grid(slice_datasets):
-    '''
+    """
     Perform various data checks to ensure that the list of slices form a
     evenly-spaced grid of data.
     Some of these checks are probably not required if the data follows the
     DICOM specification, however it seems pertinent to check anyway.
-    '''
+    """
     invariant_properties = [
         'Modality',
         'SOPClassUID',
@@ -154,11 +154,11 @@ def _validate_slices_form_uniform_grid(slice_datasets):
 
 
 def _validate_image_orientation(image_orientation):
-    '''
+    """
     Ensure that the image orientation is supported
     - The direction cosines have magnitudes of 1 (just in case)
     - The direction cosines are perpendicular
-    '''
+    """
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
 
     if not _almost_zero(np.dot(row_cosine, column_cosine), 1e-4):
@@ -217,14 +217,15 @@ def _slice_positions(slice_datasets):
 
 
 def _check_for_missing_slices(slice_positions):
-    slice_positions_diffs = np.diff(sorted(slice_positions))
-    if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-5):
-        # TODO: figure out how we should handle non-even slice spacing
-        msg = "The slice spacing is non-uniform. Slice spacings:\n{}"
-        logger.warning(msg.format(slice_positions_diffs))
+    if len(slice_positions) > 1:
+        slice_positions_diffs = np.diff(sorted(slice_positions))
+        if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-5):
+            # TODO: figure out how we should handle non-even slice spacing
+            msg = "The slice spacing is non-uniform. Slice spacings:\n{}"
+            logger.warning(msg.format(slice_positions_diffs))
 
-    if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-1):
-        raise DicomImportException('It appears there are missing slices')
+        if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-1):
+            raise DicomImportException('It appears there are missing slices')
 
 
 def _slice_spacing(slice_datasets):
@@ -232,8 +233,8 @@ def _slice_spacing(slice_datasets):
         slice_positions = _slice_positions(slice_datasets)
         slice_positions_diffs = np.diff(sorted(slice_positions))
         return np.mean(slice_positions_diffs)
-    else:
-        return 0.0
+
+    return getattr(slice_datasets[0], 'SpacingBetweenSlices', 0)
 
 
 def _sort_by_slice_position(slice_datasets):

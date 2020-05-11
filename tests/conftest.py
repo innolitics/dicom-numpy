@@ -14,12 +14,12 @@ arbitrary_shape = (10, 11)
 
 
 class MockSlice:
-    '''
+    """
     A minimal DICOM dataset representing a dataslice at a particular
     slice location.  The `slice_position` is the coordinate value along the
     remaining unused axis (i.e. the axis perpendicular to the direction
     cosines).
-    '''
+    """
 
     def __init__(self, pixel_array, slice_position, row_cosine=None, column_cosine=None, **kwargs):
         if row_cosine is None:

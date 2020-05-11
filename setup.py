@@ -49,7 +49,7 @@ setup(
 
     extras_require={
         'dev': ['check-manifest', 'sphinx', 'sphinx-autobuild', 'mock'],
-        'test': ['coverage'],
+        'test': ['coverage', 'pytest'],
     },
 
     package_data={},
