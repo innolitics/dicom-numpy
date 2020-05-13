@@ -11,6 +11,7 @@ negative_y_cos = (0, -1, 0)
 negative_z_cos = (0, 0, -1)
 
 arbitrary_shape = (10, 11)
+arbitrary_rgb_shape = (10, 11, 3)
 
 
 class MockSlice:
@@ -66,6 +67,17 @@ def axial_slices():
         MockSlice(randi(*arbitrary_shape), 1),
         MockSlice(randi(*arbitrary_shape), 2),
         MockSlice(randi(*arbitrary_shape), 3),
+    ]
+
+
+@pytest.fixture
+def axial_rgb_slices():
+    # SamplesPerPixel = 3
+    return [
+        MockSlice(randi(*arbitrary_rgb_shape), 0),
+        MockSlice(randi(*arbitrary_rgb_shape), 1),
+        MockSlice(randi(*arbitrary_rgb_shape), 2),
+        MockSlice(randi(*arbitrary_rgb_shape), 3),
     ]
 
 
