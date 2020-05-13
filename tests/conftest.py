@@ -41,8 +41,8 @@ class MockSlice:
         self.SeriesInstanceUID = 'arbitrary uid'
         self.SOPClassUID = 'arbitrary sopclass uid'
         self.PixelSpacing = [1.0, 1.0]
-        self.Rows = na
-        self.Columns = nb
+        self.Columns = na
+        self.Rows = nb
         self.SamplesPerPixel = SamplesPerPixel
         self.Modality = 'MR'
 
