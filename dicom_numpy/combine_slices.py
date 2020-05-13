@@ -136,6 +136,7 @@ def _validate_slices_form_uniform_grid(slice_datasets):
         'SeriesInstanceUID',
         'Rows',
         'Columns',
+        'SamplesPerPixel',
         'PixelSpacing',
         'PixelRepresentation',
         'BitsAllocated',

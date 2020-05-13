@@ -28,7 +28,12 @@ class MockSlice:
         if column_cosine is None:
             column_cosine = y_cos
 
-        na, nb = pixel_array.shape
+        shape = pixel_array.shape
+        if len(shape) == 2:
+            na, nb = shape
+            SamplesPerPixel = 1
+        else:
+            na, nb, SamplesPerPixel = shape
 
         self.pixel_array = pixel_array
 
@@ -37,6 +42,7 @@ class MockSlice:
         self.PixelSpacing = [1.0, 1.0]
         self.Rows = na
         self.Columns = nb
+        self.SamplesPerPixel = SamplesPerPixel
         self.Modality = 'MR'
 
         # assume that the images are centered on the remaining unused axis
