@@ -31,24 +31,24 @@ class MockSlice:
 
         shape = pixel_array.shape
         if len(shape) == 2:
-            na, nb = shape
-            SamplesPerPixel = 1
+            num_columns, num_rows = shape
+            samples_per_pixel = 1
         else:
-            na, nb, SamplesPerPixel = shape
+            num_columns, num_rows, samples_per_pixel = shape
 
         self.pixel_array = pixel_array
 
         self.SeriesInstanceUID = 'arbitrary uid'
         self.SOPClassUID = 'arbitrary sopclass uid'
         self.PixelSpacing = [1.0, 1.0]
-        self.Columns = na
-        self.Rows = nb
-        self.SamplesPerPixel = SamplesPerPixel
+        self.Columns = num_columns
+        self.Rows = num_rows
+        self.SamplesPerPixel = samples_per_pixel
         self.Modality = 'MR'
 
         # assume that the images are centered on the remaining unused axis
-        a_component = [-na/2.0*c for c in row_cosine]
-        b_component = [-nb/2.0*c for c in column_cosine]
+        a_component = [-num_columns/2.0*c for c in row_cosine]
+        b_component = [-num_rows/2.0*c for c in column_cosine]
         c_component = [(slice_position if c == 0 and cc == 0 else 0) for c, cc in zip(row_cosine, column_cosine)]
         patient_position = [a + b + c for a, b, c in zip(a_component, b_component, c_component)]
 
@@ -72,7 +72,6 @@ def axial_slices():
 
 @pytest.fixture
 def axial_rgb_slices():
-    # SamplesPerPixel = 3
     return [
         MockSlice(randi(*arbitrary_rgb_shape), 0),
         MockSlice(randi(*arbitrary_rgb_shape), 1),
