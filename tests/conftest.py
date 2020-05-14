@@ -11,6 +11,7 @@ negative_y_cos = (0, -1, 0)
 negative_z_cos = (0, 0, -1)
 
 arbitrary_shape = (10, 11)
+arbitrary_rgb_shape = (10, 11, 3)
 
 
 class MockSlice:
@@ -28,15 +29,21 @@ class MockSlice:
         if column_cosine is None:
             column_cosine = y_cos
 
-        na, nb = pixel_array.shape
+        shape = pixel_array.shape
+        if len(shape) == 2:
+            na, nb = shape
+            SamplesPerPixel = 1
+        else:
+            na, nb, SamplesPerPixel = shape
 
         self.pixel_array = pixel_array
 
         self.SeriesInstanceUID = 'arbitrary uid'
         self.SOPClassUID = 'arbitrary sopclass uid'
         self.PixelSpacing = [1.0, 1.0]
-        self.Rows = na
-        self.Columns = nb
+        self.Columns = na
+        self.Rows = nb
+        self.SamplesPerPixel = SamplesPerPixel
         self.Modality = 'MR'
 
         # assume that the images are centered on the remaining unused axis
@@ -60,6 +67,17 @@ def axial_slices():
         MockSlice(randi(*arbitrary_shape), 1),
         MockSlice(randi(*arbitrary_shape), 2),
         MockSlice(randi(*arbitrary_shape), 3),
+    ]
+
+
+@pytest.fixture
+def axial_rgb_slices():
+    # SamplesPerPixel = 3
+    return [
+        MockSlice(randi(*arbitrary_rgb_shape), 0),
+        MockSlice(randi(*arbitrary_rgb_shape), 1),
+        MockSlice(randi(*arbitrary_rgb_shape), 2),
+        MockSlice(randi(*arbitrary_rgb_shape), 3),
     ]
 
 

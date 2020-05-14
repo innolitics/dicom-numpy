@@ -30,6 +30,12 @@ class TestCombineSlices:
         assert np.array_equal(array, dataset.pixel_array.T[:, :, None])
         assert np.isclose(np.linalg.norm(affine[:, 2]), np.abs(slice_spacing))
 
+    def test_rgb_axial_set(self, axial_rgb_slices):
+        combined, _ = combine_slices(axial_rgb_slices)
+
+        manually_combined = np.stack([ds.pixel_array for ds in axial_rgb_slices], axis=0).T
+        assert np.array_equal(combined, manually_combined)
+
 
 class TestMergeSlicePixelArrays:
     def test_casting_if_only_rescale_slope(self):

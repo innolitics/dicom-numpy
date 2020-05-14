@@ -75,27 +75,27 @@ def combine_slices(slice_datasets, rescale=None):
 
 
 def _merge_slice_pixel_arrays(slice_datasets, rescale=None):
-    first_dataset = slice_datasets[0]
-    num_rows = first_dataset.Rows
-    num_columns = first_dataset.Columns
-    num_slices = len(slice_datasets)
-
     sorted_slice_datasets = _sort_by_slice_position(slice_datasets)
 
     if rescale is None:
         rescale = any(_requires_rescaling(d) for d in sorted_slice_datasets)
 
-    if rescale:
-        voxels = np.empty((num_columns, num_rows, num_slices), dtype=np.float32, order='F')
-        for k, dataset in enumerate(sorted_slice_datasets):
+    first_dataset = sorted_slice_datasets[0]
+    slice_dtype = first_dataset.pixel_array.dtype
+    slice_shape = first_dataset.pixel_array.T.shape
+    num_slices = len(sorted_slice_datasets)
+
+    voxels_shape = slice_shape + (num_slices,)
+    voxels_dtype = np.float32 if rescale else slice_dtype
+    voxels = np.empty(voxels_shape, dtype=voxels_dtype, order='F')
+
+    for k, dataset in enumerate(sorted_slice_datasets):
+        pixel_array = dataset.pixel_array.T
+        if rescale:
             slope = float(getattr(dataset, 'RescaleSlope', 1))
             intercept = float(getattr(dataset, 'RescaleIntercept', 0))
-            voxels[:, :, k] = dataset.pixel_array.T.astype(np.float32) * slope + intercept
-    else:
-        dtype = first_dataset.pixel_array.dtype
-        voxels = np.empty((num_columns, num_rows, num_slices), dtype=dtype, order='F')
-        for k, dataset in enumerate(sorted_slice_datasets):
-            voxels[:, :, k] = dataset.pixel_array.T
+            pixel_array = pixel_array.astype(np.float32) * slope + intercept
+        voxels[..., k] = pixel_array
 
     return voxels
 
@@ -136,6 +136,7 @@ def _validate_slices_form_uniform_grid(slice_datasets):
         'SeriesInstanceUID',
         'Rows',
         'Columns',
+        'SamplesPerPixel',
         'PixelSpacing',
         'PixelRepresentation',
         'BitsAllocated',
