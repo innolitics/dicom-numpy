@@ -13,7 +13,7 @@ Github Issue!
 Dependencies
 ============
 
-- Python 2.7 or Python 3.4+
+- Python 2.7 or Python 3.5+
 - Numpy
 - PyDicom
 
