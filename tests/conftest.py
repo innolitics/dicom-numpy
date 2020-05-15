@@ -31,18 +31,18 @@ class MockSlice:
 
         shape = pixel_array.shape
         if len(shape) == 2:
-            num_columns, num_rows = shape
+            num_rows, num_columns = shape
             samples_per_pixel = 1
         else:
-            num_columns, num_rows, samples_per_pixel = shape
+            num_rows, num_columns, samples_per_pixel = shape
 
         self.pixel_array = pixel_array
 
         self.SeriesInstanceUID = 'arbitrary uid'
         self.SOPClassUID = 'arbitrary sopclass uid'
         self.PixelSpacing = [1.0, 1.0]
-        self.Columns = num_columns
         self.Rows = num_rows
+        self.Columns = num_columns
         self.SamplesPerPixel = samples_per_pixel
         self.Modality = 'MR'
 
