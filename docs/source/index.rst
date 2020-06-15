@@ -127,6 +127,15 @@ Run all of the tests for the currently active python version using:
 
     pytest
 
+Other Contributors
+------------------
+
+Additional contributions made by:
+
+- Jonathan Daniel
+
+Thank you!
+
 
 About Innolitics
 ================
