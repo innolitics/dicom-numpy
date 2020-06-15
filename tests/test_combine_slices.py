@@ -13,7 +13,14 @@ from .conftest import MockSlice
 class TestCombineSlices:
     def test_simple_axial_set(self, axial_slices):
         combined, _ = combine_slices(axial_slices[0:2])
+        manually_combined = np.dstack((axial_slices[0].pixel_array.T, axial_slices[1].pixel_array.T))
+        assert np.array_equal(combined, manually_combined)
 
+    def test_simple_axial_set_w_dicomdir(self, axial_slices):
+        dicomdir_dataset = axial_slices[2]
+        dicomdir_dataset.MediaStorageSOPClassUID = '1.2.840.10008.1.3.10'
+        datasets = [dicomdir_dataset, axial_slices[0], axial_slices[1]]
+        combined, _ = combine_slices(datasets)
         manually_combined = np.dstack((axial_slices[0].pixel_array.T, axial_slices[1].pixel_array.T))
         assert np.array_equal(combined, manually_combined)
 

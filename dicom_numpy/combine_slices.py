@@ -9,7 +9,7 @@ from .exceptions import DicomImportException
 logger = logging.getLogger(__name__)
 
 
-def combine_slices(slice_datasets, rescale=None):
+def combine_slices(datasets, rescale=None):
     """
     Given a list of pydicom datasets for an image series, stitch them together into a
     three-dimensional numpy array.  Also calculate a 4x4 affine transformation
@@ -30,6 +30,8 @@ def combine_slices(slice_datasets, rescale=None):
     `False`, the original dtype will be preserved even if DICOM rescaling information is present.
 
     The returned array has the column-major byte-order.
+
+    Datasets produced by reading DICOMDIR files are ignored.
 
     This function requires that the datasets:
 
@@ -63,8 +65,10 @@ def combine_slices(slice_datasets, rescale=None):
 
     If any of these conditions are not met, a `dicom_numpy.DicomImportException` is raised.
     """
+    slice_datasets = [ds for ds in datasets if not _is_dicomdir(ds)]
+
     if len(slice_datasets) == 0:
-        raise DicomImportException("Must provide at least one DICOM dataset")
+        raise DicomImportException("Must provide at least one image DICOM dataset")
 
     _validate_slices_form_uniform_grid(slice_datasets)
 
@@ -72,6 +76,11 @@ def combine_slices(slice_datasets, rescale=None):
     transform = _ijk_to_patient_xyz_transform_matrix(slice_datasets)
 
     return voxels, transform
+
+
+def _is_dicomdir(dataset):
+    media_sop_class = getattr(dataset, 'MediaStorageSOPClassUID', None)
+    return media_sop_class == '1.2.840.10008.1.3.10'
 
 
 def _merge_slice_pixel_arrays(slice_datasets, rescale=None):
