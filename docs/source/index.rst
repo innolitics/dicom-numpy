@@ -73,6 +73,12 @@ Change Log
 Version 0.4.0
 -------------
 - Ignore DICOMDIR files
+- Fix bug that was triggered when using `from dicom_numpy import *`
+- Make `combine_slices` work with a single slice
+- Add support for "channeled slices" (e.g., RGB slices)
+- Allow HighBit and BitsStored DICOM attributes to be non-uniform
+- Drop support for Python 3.4; test Python 3.7
+- Require the SamplesPerPixel DICOM attribute to be invariant among the slices
 
 Version 0.3.0
 -------------

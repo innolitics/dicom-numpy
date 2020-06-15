@@ -40,16 +40,15 @@ def combine_slices(datasets, rescale=None):
       `Modality <https://dicom.innolitics.com/ciods/ct-image/general-series/00080060>`_,
       and `SOP Class UID <https://dicom.innolitics.com/ciods/ct-image/sop-common/00080016>`_).
     - The binary storage of each slice must be the same (have the same
-      `Bits Allocated <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280100>`_,
-      `Bits Stored <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280101>`_,
-      `High Bit <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280102>`_, and
+      `Bits Allocated <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280100>`_ and
       `Pixel Representation <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280103>`_).
     - The image slice must approximately form a grid. This means there can not
       be any missing internal slices (missing slices on the ends of the dataset
       are not detected).
-    - It also means that  each slice must have the same
+    - It also means that each slice must have the same
       `Rows <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280010>`_,
       `Columns <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280011>`_,
+      `Samples Per Pixel <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280002>`_,
       `Pixel Spacing <https://dicom.innolitics.com/ciods/ct-image/image-plane/00280030>`_, and
       `Image Orientation (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200037>`_
       attribute values.
