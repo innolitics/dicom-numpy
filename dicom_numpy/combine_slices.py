@@ -9,7 +9,7 @@ from .exceptions import DicomImportException
 logger = logging.getLogger(__name__)
 
 
-def combine_slices(slice_datasets, rescale=None):
+def combine_slices(datasets, rescale=None):
     """
     Given a list of pydicom datasets for an image series, stitch them together into a
     three-dimensional numpy array.  Also calculate a 4x4 affine transformation
@@ -31,6 +31,8 @@ def combine_slices(slice_datasets, rescale=None):
 
     The returned array has the column-major byte-order.
 
+    Datasets produced by reading DICOMDIR files are ignored.
+
     This function requires that the datasets:
 
     - Be in same series (have the same
@@ -38,16 +40,15 @@ def combine_slices(slice_datasets, rescale=None):
       `Modality <https://dicom.innolitics.com/ciods/ct-image/general-series/00080060>`_,
       and `SOP Class UID <https://dicom.innolitics.com/ciods/ct-image/sop-common/00080016>`_).
     - The binary storage of each slice must be the same (have the same
-      `Bits Allocated <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280100>`_,
-      `Bits Stored <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280101>`_,
-      `High Bit <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280102>`_, and
+      `Bits Allocated <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280100>`_ and
       `Pixel Representation <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280103>`_).
     - The image slice must approximately form a grid. This means there can not
       be any missing internal slices (missing slices on the ends of the dataset
       are not detected).
-    - It also means that  each slice must have the same
+    - It also means that each slice must have the same
       `Rows <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280010>`_,
       `Columns <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280011>`_,
+      `Samples Per Pixel <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280002>`_,
       `Pixel Spacing <https://dicom.innolitics.com/ciods/ct-image/image-plane/00280030>`_, and
       `Image Orientation (Patient) <https://dicom.innolitics.com/ciods/ct-image/image-plane/00200037>`_
       attribute values.
@@ -63,8 +64,10 @@ def combine_slices(slice_datasets, rescale=None):
 
     If any of these conditions are not met, a `dicom_numpy.DicomImportException` is raised.
     """
+    slice_datasets = [ds for ds in datasets if not _is_dicomdir(ds)]
+
     if len(slice_datasets) == 0:
-        raise DicomImportException("Must provide at least one DICOM dataset")
+        raise DicomImportException("Must provide at least one image DICOM dataset")
 
     _validate_slices_form_uniform_grid(slice_datasets)
 
@@ -72,6 +75,11 @@ def combine_slices(slice_datasets, rescale=None):
     transform = _ijk_to_patient_xyz_transform_matrix(slice_datasets)
 
     return voxels, transform
+
+
+def _is_dicomdir(dataset):
+    media_sop_class = getattr(dataset, 'MediaStorageSOPClassUID', None)
+    return media_sop_class == '1.2.840.10008.1.3.10'
 
 
 def _merge_slice_pixel_arrays(slice_datasets, rescale=None):
