@@ -70,24 +70,34 @@ Details
 Change Log
 ==========
 
-Version 0.1.5
------------
-
-- Added the `rescale` option to `combine_slices`
-- Made `combine_slices`'s returned ndarray use column-major ordering
-
-Version 0.2.0
------------
-
-- Changed the behavior of `combine_slices` to stack slices from head (slice 0)
-  to foot (slice -1). Note that this is the reverse of the behavior in v0.1.*.
+Version 0.4.0
+-------------
+- Ignore DICOMDIR files
+- Fix bug that was triggered when using `from dicom_numpy import *`
+- Make `combine_slices` work with a single slice
+- Add support for "channeled slices" (e.g., RGB slices)
+- Allow HighBit and BitsStored DICOM attributes to be non-uniform
+- Drop support for Python 3.4; test Python 3.7
+- Require the SamplesPerPixel DICOM attribute to be invariant among the slices
 
 Version 0.3.0
------------
+-------------
 
 - Reverted slice ordering change from v0.2.0, since the DICOM standard defines
   the Z-axis direction to be increasing in the direction of the head.
 - Added support for both PyDicom 0.X and 1.X
+
+Version 0.2.0
+-------------
+
+- Changed the behavior of `combine_slices` to stack slices from head (slice 0)
+  to foot (slice -1). Note that this is the reverse of the behavior in v0.1.*.
+
+Version 0.1.5
+-------------
+
+- Added the `rescale` option to `combine_slices`
+- Made `combine_slices`'s returned ndarray use column-major ordering
 
 Contributing
 ============
@@ -116,6 +126,15 @@ Run all of the tests for the currently active python version using:
 .. code:: bash
 
     pytest
+
+Other Contributors
+------------------
+
+Additional contributions made by:
+
+- Jonathan Daniel
+
+Thank you!
 
 
 About Innolitics
