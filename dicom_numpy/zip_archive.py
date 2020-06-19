@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 def combined_series_from_zip(zip_filename):
-    logger.info('Extracting voxel data from "{}"'.format(zip_filename))
+    logger.info(f'Extracting voxel data from "{zip_filename}"')
 
     if not zipfile.is_zipfile(zip_filename):
-        raise DicomImportException('Invalid zipfile {}'.format(zip_filename))
+        raise DicomImportException(f'Invalid zipfile {zip_filename}')
 
     with zipfile.ZipFile(zip_filename, 'r') as zip_file:
         datasets = dicom_datasets_from_zip(zip_file)
@@ -46,8 +46,8 @@ def dicom_datasets_from_zip(zip_file):
             dataset = pydicom.read_file(temp_file)
             datasets.append(dataset)
         except pydicom.errors.InvalidDicomError as e:
-            msg = 'Skipping invalid DICOM file "{}": {}'
-            logger.info(msg.format(entry, e))
+            msg = f'Skipping invalid DICOM file "{entry}": {e}'
+            logger.info(msg)
 
     if len(datasets) == 0:
         raise DicomImportException('Zipfile does not contain any valid DICOM files')

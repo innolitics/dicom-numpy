@@ -171,19 +171,19 @@ def _validate_image_orientation(image_orientation):
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
 
     if not _almost_zero(np.dot(row_cosine, column_cosine), 1e-4):
-        raise DicomImportException("Non-orthogonal direction cosines: {}, {}".format(row_cosine, column_cosine))
+        raise DicomImportException(f"Non-orthogonal direction cosines: {row_cosine}, {column_cosine}")
     elif not _almost_zero(np.dot(row_cosine, column_cosine), 1e-8):
-        logger.warning("Direction cosines aren't quite orthogonal: {}, {}".format(row_cosine, column_cosine))
+        logger.warning(f"Direction cosines aren't quite orthogonal: {row_cosine}, {column_cosine}")
 
     if not _almost_one(np.linalg.norm(row_cosine), 1e-4):
-        raise DicomImportException("The row direction cosine's magnitude is not 1: {}".format(row_cosine))
+        raise DicomImportException(f"The row direction cosine's magnitude is not 1: {row_cosine}")
     elif not _almost_one(np.linalg.norm(row_cosine), 1e-8):
-        logger.warning("The row direction cosine's magnitude is not quite 1: {}".format(row_cosine))
+        logger.warning(f"The row direction cosine's magnitude is not quite 1: {row_cosine}")
 
     if not _almost_one(np.linalg.norm(column_cosine), 1e-4):
-        raise DicomImportException("The column direction cosine's magnitude is not 1: {}".format(column_cosine))
+        raise DicomImportException(f"The column direction cosine's magnitude is not 1: {column_cosine}")
     elif not _almost_one(np.linalg.norm(column_cosine), 1e-8):
-        logger.warning("The column direction cosine's magnitude is not quite 1: {}".format(column_cosine))
+        logger.warning(f"The column direction cosine's magnitude is not quite 1: {column_cosine}")
 
 
 def _almost_zero(value, abs_tol):
@@ -206,8 +206,8 @@ def _slice_attribute_equal(slice_datasets, property_name):
     for dataset in slice_datasets[1:]:
         value = getattr(dataset, property_name, None)
         if value != initial_value:
-            msg = 'All slices must have the same value for "{}": {} != {}'
-            raise DicomImportException(msg.format(property_name, value, initial_value))
+            msg = f'All slices must have the same value for "{property_name}": {value} != {initial_value}'
+            raise DicomImportException(msg)
 
 
 def _slice_ndarray_attribute_almost_equal(slice_datasets, property_name, abs_tol):
@@ -215,8 +215,9 @@ def _slice_ndarray_attribute_almost_equal(slice_datasets, property_name, abs_tol
     for dataset in slice_datasets[1:]:
         value = getattr(dataset, property_name, None)
         if not np.allclose(value, initial_value, atol=abs_tol):
-            msg = 'All slices must have the same value for "{}" within "{}": {} != {}'
-            raise DicomImportException(msg.format(property_name, abs_tol, value, initial_value))
+            msg = (f'All slices must have the same value for "{property_name}" within "{abs_tol}": {value} != '
+                   f'{initial_value}')
+            raise DicomImportException(msg)
 
 
 def _slice_positions(slice_datasets):
@@ -230,8 +231,8 @@ def _check_for_missing_slices(slice_positions):
         slice_positions_diffs = np.diff(sorted(slice_positions))
         if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-5):
             # TODO: figure out how we should handle non-even slice spacing
-            msg = "The slice spacing is non-uniform. Slice spacings:\n{}"
-            logger.warning(msg.format(slice_positions_diffs))
+            msg = f"The slice spacing is non-uniform. Slice spacings:\n{slice_positions_diffs}"
+            logger.warning(msg)
 
         if not np.allclose(slice_positions_diffs, slice_positions_diffs[0], atol=0, rtol=1e-1):
             raise DicomImportException('It appears there are missing slices')
