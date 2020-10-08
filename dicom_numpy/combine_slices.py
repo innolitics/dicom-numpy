@@ -8,7 +8,7 @@ from .exceptions import DicomImportException
 
 logger = logging.getLogger(__name__)
 
-
+#TO CHEÇK: DS tried to convert a single dcm to numpy array but I get an output in which all info in 2D, while the  3D contains no info
 def combine_slices(datasets, rescale=None):
     """
     Given a list of pydicom datasets for an image series, stitch them together into a
