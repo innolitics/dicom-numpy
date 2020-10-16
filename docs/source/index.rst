@@ -70,6 +70,9 @@ Details
 
 Change Log
 ==========
+Version 0.5.0
+-------------
+- Export `sort_by_slice_position`
 
 Version 0.4.0
 -------------
