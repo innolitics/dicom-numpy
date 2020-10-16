@@ -65,6 +65,7 @@ Details
 -------
 
 .. autofunction:: dicom_numpy.combine_slices
+.. autofunction:: dicom_numpy.sort_by_slice_position
 
 
 Change Log
