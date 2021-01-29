@@ -253,5 +253,3 @@ def _slice_spacing(slice_datasets):
         return np.mean(slice_positions_diffs)
 
     return getattr(slice_datasets[0], 'SpacingBetweenSlices', 0)
-
-
