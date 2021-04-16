@@ -77,13 +77,24 @@ def combine_slices(datasets, rescale=None):
     return voxels, transform
 
 
+def sort_by_slice_position(slice_datasets):
+    """
+    Given a list of pydicom Datasets, return the datasets sorted in the image orientation direction.
+
+    This does not require `pixel_array` to be present, and so may be used to associate instance Datasets
+    with the voxels returned from `combine_slices.
+    """
+    slice_positions = _slice_positions(slice_datasets)
+    return [d for (s, d) in sorted(zip(slice_positions, slice_datasets))]
+
+
 def _is_dicomdir(dataset):
     media_sop_class = getattr(dataset, 'MediaStorageSOPClassUID', None)
     return media_sop_class == '1.2.840.10008.1.3.10'
 
 
 def _merge_slice_pixel_arrays(slice_datasets, rescale=None):
-    sorted_slice_datasets = _sort_by_slice_position(slice_datasets)
+    sorted_slice_datasets = sort_by_slice_position(slice_datasets)
 
     if rescale is None:
         rescale = any(_requires_rescaling(d) for d in sorted_slice_datasets)
@@ -113,7 +124,7 @@ def _requires_rescaling(dataset):
 
 
 def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
-    first_dataset = _sort_by_slice_position(slice_datasets)[0]
+    first_dataset = sort_by_slice_position(slice_datasets)[0]
     image_orientation = first_dataset.ImageOrientationPatient
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
 
@@ -245,8 +256,3 @@ def _slice_spacing(slice_datasets):
         return np.mean(slice_positions_diffs)
 
     return getattr(slice_datasets[0], 'SpacingBetweenSlices', 0)
-
-
-def _sort_by_slice_position(slice_datasets):
-    slice_positions = _slice_positions(slice_datasets)
-    return [d for (s, d) in sorted(zip(slice_positions, slice_datasets))]
