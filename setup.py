@@ -3,7 +3,6 @@ A setuptools based setup module.
 """
 
 from setuptools import setup, find_packages
-from codecs import open
 from os import path
 
 from dicom_numpy import __version__
@@ -35,6 +34,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9'
     ],
 
     keywords='dicom numpy',
@@ -50,10 +51,6 @@ setup(
 
     extras_require={
         'dev': ['check-manifest', 'sphinx', 'sphinx-autobuild', 'mock'],
-        'test': ['coverage', 'pytest'],
-    },
-
-    package_data={},
-    data_files=[],
-    entry_points={},
+        'test': ['coverage', 'pytest']
+    }
 )

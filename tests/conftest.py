@@ -37,7 +37,8 @@ class MockSlice:
             num_rows, num_columns, samples_per_pixel = shape
             # TODO: add
             #  self.PlanarConfiguration = 0
-            #  (can be 0 or 1 - defines "channel-first" or "channels-last" in the transposed pixel array, respectively)
+            #  (can be 0 or 1 - defines "channels-last" or "channels-first"
+            #  in pixel_array, respectively. Usually, it is 0 - just as here)
 
         self.pixel_array = pixel_array
 

@@ -156,11 +156,9 @@ def _validate_slices_form_uniform_grid(slice_datasets):
         'Rows',
         'Columns',
         'SamplesPerPixel',
-        # TODO: if SamplesPerPixel > 1, add 'PlanarConfiguration' to invariant_properties and take care of it in the
-        #  combination of the slices into voxels
         'PixelSpacing',
         'PixelRepresentation',
-        'BitsAllocated',
+        'BitsAllocated'
     ]
 
     for property_name in invariant_properties:
