@@ -6,6 +6,8 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
+from dicom_numpy import __version__
+
 here = path.abspath(path.dirname(__file__))
 
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
@@ -13,7 +15,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='dicom_numpy',
-    version='0.5.0',
+    version=__version__,
     description='Extract image data into a 3D numpy array from a set of DICOM files.',
     long_description=long_description,
     url='https://github.com/innolitics/dicom-numpy',
