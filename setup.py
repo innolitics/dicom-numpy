@@ -43,14 +43,14 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
 
     install_requires=[
-        'pydicom',
+        'pydicom >= 1.0',
         'numpy',
     ],
 
     python_requires='>= 3.6',
 
     extras_require={
-        'dev': ['check-manifest', 'sphinx', 'sphinx-autobuild', 'mock'],
+        'dev': ['check-manifest', 'sphinx', 'sphinx-autobuild'],
         'test': ['coverage', 'pytest']
     }
 )
