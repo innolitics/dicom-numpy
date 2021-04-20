@@ -35,10 +35,14 @@ class MockSlice:
             samples_per_pixel = 1
         else:
             num_rows, num_columns, samples_per_pixel = shape
-            # TODO: add
-            #  self.PlanarConfiguration = 0
-            #  (can be 0 or 1 - defines "channels-last" or "channels-first"
-            #  in pixel_array, respectively. Usually, it is 0 - just as here)
+            # TODO: when `combine_slices` takes care of the planar configuration (also in invariant_properties), add
+            #  self.PlanarConfiguration = 0,
+            #  which means that the RGB channels are in the last axis.
+            #  The Planar Configuration tag is required when Samples Per Pixel > 1.
+            #  It can be 0 - "channels-last" or 1 - "channels-first" (in pixel_array).
+            #  Usually, it is 0 - just as here. See
+            #  https://dicom.innolitics.com/ciods/enhanced-mr-image/enhanced-mr-image/00280006
+
 
         self.pixel_array = pixel_array
 

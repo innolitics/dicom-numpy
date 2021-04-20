@@ -158,7 +158,7 @@ def _validate_slices_form_uniform_grid(slice_datasets):
         'SamplesPerPixel',
         'PixelSpacing',
         'PixelRepresentation',
-        'BitsAllocated'
+        'BitsAllocated',
     ]
 
     for property_name in invariant_properties:
