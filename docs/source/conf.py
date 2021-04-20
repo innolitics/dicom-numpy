@@ -20,10 +20,7 @@
 import os
 import sys
 
-try:
-    from unittest.mock import MagicMock
-except ImportError:
-    from mock import Mock as MagicMock
+from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.abspath('../..'))
 
@@ -34,7 +31,7 @@ class Mock(MagicMock):
         return MagicMock()
 
 
-MOCK_MODULES = ['numpy', 'dicom']
+MOCK_MODULES = ['numpy', 'pydicom']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 

@@ -3,8 +3,9 @@ A setuptools based setup module.
 """
 
 from setuptools import setup, find_packages
-from codecs import open
 from os import path
+
+from dicom_numpy import __version__
 
 here = path.abspath(path.dirname(__file__))
 
@@ -13,7 +14,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='dicom_numpy',
-    version='0.5.0',
+    version=__version__,
     description='Extract image data into a 3D numpy array from a set of DICOM files.',
     long_description=long_description,
     url='https://github.com/innolitics/dicom-numpy',
@@ -30,12 +31,11 @@ setup(
 
         'License :: OSI Approved :: MIT License',
 
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9'
     ],
 
     keywords='dicom numpy',
@@ -43,16 +43,14 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
 
     install_requires=[
-        'pydicom',
+        'pydicom >= 1.0',
         'numpy',
     ],
 
-    extras_require={
-        'dev': ['check-manifest', 'sphinx', 'sphinx-autobuild', 'mock'],
-        'test': ['coverage', 'pytest'],
-    },
+    python_requires='>= 3.6',
 
-    package_data={},
-    data_files=[],
-    entry_points={},
+    extras_require={
+        'dev': ['check-manifest', 'sphinx', 'sphinx-autobuild'],
+        'test': ['coverage', 'pytest']
+    }
 )

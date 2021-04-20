@@ -4,7 +4,7 @@ DICOM-Numpy
 
 This python module provides a set of utilities for extracting data contained in
 DICOM files into Numpy ndarrays.  It is a higher-level library that builds on the excellent lower-level `pydicom
-<http://pydicom.readthedocs.io/en/stable/>`_ library.
+<https://pydicom.github.io/pydicom/>`_ library.
 
 The library is quite small at the moment, however, if you have a DICOM-related
 utility function that you think would be appropriate to include, create a
@@ -13,9 +13,9 @@ Github Issue!
 Dependencies
 ============
 
-- Python 2.7 or Python 3.5+
+- Python 3.6+
 - Numpy
-- PyDicom
+- PyDicom 1.0+
 
 
 Installation
@@ -41,18 +41,18 @@ single 3D image into a single scan.
 
 The function that performs this task is `combine_slices`.  Since this library
 builds on pydicom, `combine_slices` takes an list of `pydicom
-datasets <http://pydicom.readthedocs.io/en/stable/pydicom_user_guide.html#dataset>`_.
+datasets <https://pydicom.github.io/pydicom/stable/old/base_element.html#dataset>`_.
 
 Example
 -------
 
 .. code:: python
 
-    import dicom
+    import pydicom
     import dicom_numpy
 
     def extract_voxel_data(list_of_dicom_files):
-        datasets = [dicom.read_file(f) for f in list_of_dicom_files]
+        datasets = [pydicom.dcmread(f) for f in list_of_dicom_files]
         try:
             voxel_ndarray, ijk_to_xyz = dicom_numpy.combine_slices(datasets)
         except dicom_numpy.DicomImportException as e:
