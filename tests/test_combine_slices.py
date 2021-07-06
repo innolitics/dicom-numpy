@@ -3,7 +3,6 @@ import pytest
 
 from dicom_numpy.combine_slices import (
     combine_slices,
-    _validate_slices_form_uniform_grid,
     _merge_slice_pixel_arrays,
 )
 from dicom_numpy.exceptions import DicomImportException
@@ -100,13 +99,25 @@ class TestMergeSlicePixelArrays:
 
 
 class TestValidateSlicesFormUniformGrid:
-    def test_missing_middle_slice(self, axial_slices):
+    def test_missing_middle_slice_strict(self, axial_slices):
         """
-        All slices must be present.  Slice position is determined using the
-        ImagePositionPatient (0020,0032) tag.
+        By default, all slices must be present. Slice position is determined
+        using the ImagePositionPatient (0020,0032) tag.
         """
         with pytest.raises(DicomImportException):
-            _validate_slices_form_uniform_grid([axial_slices[0], axial_slices[2], axial_slices[3]])
+            combine_slices([axial_slices[0], axial_slices[2], axial_slices[3]])
+
+    def test_missing_middle_slice_lax(self, axial_slices):
+        """
+        if `enforce_slice_spacing` is set to False, the no missing slices
+        constraint is relaxed. In this case, slices are stacked together as if
+        there were no missing slices.
+        """
+        voxels, _transform = combine_slices(
+            [axial_slices[0], axial_slices[2], axial_slices[3]],
+            enforce_slice_spacing=False,
+        )
+        assert voxels.shape[2] == 3
 
     def test_insignificant_difference_in_direction_cosines(self, axial_slices):
         """
@@ -114,12 +125,12 @@ class TestValidateSlicesFormUniformGrid:
         different direction cosines.
         """
         axial_slices[0].ImageOrientationPatient[0] += 1e-6
-        _validate_slices_form_uniform_grid(axial_slices)
+        combine_slices(axial_slices)
 
     def test_significant_difference_in_direction_cosines(self, axial_slices):
         axial_slices[0].ImageOrientationPatient[0] += 1e-4
         with pytest.raises(DicomImportException):
-            _validate_slices_form_uniform_grid(axial_slices)
+            combine_slices(axial_slices, enforce_slice_spacing=False)
 
     def test_slices_from_different_series(self, axial_slices):
         """
@@ -128,7 +139,7 @@ class TestValidateSlicesFormUniformGrid:
         """
         axial_slices[2].SeriesInstanceUID += 'Ooops'
         with pytest.raises(DicomImportException):
-            _validate_slices_form_uniform_grid(axial_slices)
+            combine_slices(axial_slices, enforce_slice_spacing=False)
 
     @pytest.mark.xfail(reason='Not sure how to detect this in DICOM')
     def test_missing_end_slice(self, axial_slices):
@@ -138,4 +149,7 @@ class TestValidateSlicesFormUniformGrid:
         seems impossible.
         """
         with pytest.raises(DicomImportException):
-            _validate_slices_form_uniform_grid([axial_slices[0], axial_slices[1], axial_slices[2]])
+            combine_slices(
+                [axial_slices[0], axial_slices[1], axial_slices[2]],
+                enforce_slice_spacing=False,
+            )
