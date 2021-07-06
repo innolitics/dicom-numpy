@@ -9,7 +9,7 @@ from .exceptions import DicomImportException
 logger = logging.getLogger(__name__)
 
 
-def combine_slices(datasets, rescale=None):
+def combine_slices(datasets, rescale=None, enforce_slice_spacing=True):
     """
     Given a list of pydicom datasets for an image series, stitch them together into a
     three-dimensional numpy array.  Also calculate a 4x4 affine transformation
@@ -29,6 +29,11 @@ def combine_slices(datasets, rescale=None):
     If `rescale` is `True` the voxels will be cast to `float32`, if set to
     `False`, the original dtype will be preserved even if DICOM rescaling information is present.
 
+    If `enforce_slice_spacing` is set to `True`, `combine_slices` will raise a
+    `DicomImportException` if there are missing slices detected in the
+    datasets. If `enforce_slice_spacing` is set to `False`, missing slices will
+    be ignored.
+
     The returned array has the column-major byte-order.
 
     Datasets produced by reading DICOMDIR files are ignored.
@@ -44,8 +49,8 @@ def combine_slices(datasets, rescale=None):
       `Pixel Representation <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280103>`_).
     - The image slice must approximately form a grid. This means there can not
       be any missing internal slices (missing slices on the ends of the dataset
-      are not detected).
-    - It also means that each slice must have the same
+      are not detected). This requirement is relaxed if `enforce_slice_spacing` is set to `False`.
+    - Each slice must have the same
       `Rows <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280010>`_,
       `Columns <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280011>`_,
       `Samples Per Pixel <https://dicom.innolitics.com/ciods/ct-image/image-pixel/00280002>`_,
@@ -69,7 +74,7 @@ def combine_slices(datasets, rescale=None):
     if len(slice_datasets) == 0:
         raise DicomImportException("Must provide at least one image DICOM dataset")
 
-    _validate_slices_form_uniform_grid(slice_datasets)
+    _validate_slices_form_uniform_grid(slice_datasets, enforce_slice_spacing=enforce_slice_spacing)
 
     voxels = _merge_slice_pixel_arrays(slice_datasets, rescale)
     transform = _ijk_to_patient_xyz_transform_matrix(slice_datasets)
@@ -142,10 +147,12 @@ def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
     return transform
 
 
-def _validate_slices_form_uniform_grid(slice_datasets):
+def _validate_slices_form_uniform_grid(slice_datasets, enforce_slice_spacing=True):
     """
     Perform various data checks to ensure that the list of slices form a
-    evenly-spaced grid of data.
+    evenly-spaced grid of data. Optionally, this can be slightly relaxed to
+    allow for missing slices in the volume.
+
     Some of these checks are probably not required if the data follows the
     DICOM specification, however it seems pertinent to check anyway.
     """
@@ -167,8 +174,9 @@ def _validate_slices_form_uniform_grid(slice_datasets):
     _validate_image_orientation(slice_datasets[0].ImageOrientationPatient)
     _slice_ndarray_attribute_almost_equal(slice_datasets, 'ImageOrientationPatient', 1e-5)
 
-    slice_positions = _slice_positions(slice_datasets)
-    _check_for_missing_slices(slice_positions)
+    if enforce_slice_spacing:
+        slice_positions = _slice_positions(slice_datasets)
+        _check_for_missing_slices(slice_positions)
 
 
 def _validate_image_orientation(image_orientation):
