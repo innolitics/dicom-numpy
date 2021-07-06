@@ -43,7 +43,6 @@ class MockSlice:
             #  Usually, it is 0 - just as here. See
             #  https://dicom.innolitics.com/ciods/enhanced-mr-image/enhanced-mr-image/00280006
 
-
         self.pixel_array = pixel_array
 
         self.SeriesInstanceUID = 'arbitrary uid'
