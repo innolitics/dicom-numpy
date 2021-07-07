@@ -259,6 +259,6 @@ def _slice_spacing(slice_datasets):
     if len(slice_datasets) > 1:
         slice_positions = _slice_positions(slice_datasets)
         slice_positions_diffs = np.diff(sorted(slice_positions))
-        return np.mean(slice_positions_diffs)
+        return np.median(slice_positions_diffs)
 
     return getattr(slice_datasets[0], 'SpacingBetweenSlices', 0)
