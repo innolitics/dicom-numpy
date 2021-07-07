@@ -70,6 +70,19 @@ Details
 
 Change Log
 ==========
+
+Version 0.6.0
+-------------
+- Add `enforce_slice_spacing` keyword argument to `combine_slices`, which
+  defaults to True. When this keyword argument is set to False, slices can be
+  combined even if some are missing, i.e. the slices do not form a uniform
+  grid.
+- The slice spacing calculation (used in the formation of the image
+  transformation matrix) has been changed to use the median of the spacing
+  between slices, rather than the mean. This change was made to make the
+  calculation less sensitive to large gaps skewing the slice spacing
+  calculation as a result of missing slices.
+
 Version 0.5.0
 -------------
 - Export `sort_by_slice_position`
