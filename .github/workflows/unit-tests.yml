@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install Tox and build dependencies
-        run: pip install tox numpy
+        run: pip install tox
       - name: Run Tox
         # Run tox using the version of Python in `PATH`
         run: tox . --skip-missing-interpreters
