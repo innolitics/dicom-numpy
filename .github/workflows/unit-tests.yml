@@ -1,0 +1,22 @@
+name: Unit tests
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install Tox and build dependencies
+        run: pip install tox numpy
+      - name: Run Tox
+        # Run tox using the version of Python in `PATH`
+        run: tox . --skip-missing-interpreters
