@@ -5,16 +5,18 @@ A setuptools based setup module.
 from setuptools import setup, find_packages
 from os import path
 
-from dicom_numpy import __version__
-
 here = path.abspath(path.dirname(__file__))
 
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+metadata = {}
+with open(path.join(here, 'dicom_numpy', 'version.py')) as f:
+    exec(f.read(), metadata)
+
 setup(
     name='dicom_numpy',
-    version=__version__,
+    version=metadata['__version__'],
     description='Extract image data into a 3D numpy array from a set of DICOM files.',
     long_description=long_description,
     url='https://github.com/innolitics/dicom-numpy',
