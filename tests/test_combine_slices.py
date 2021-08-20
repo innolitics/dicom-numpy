@@ -1,12 +1,41 @@
+# from copy import deepcopy
+from glob import glob
+import os
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
+
 import numpy as np
 import pytest
+import pydicom
 
 from dicom_numpy.combine_slices import (
     combine_slices,
+    sort_by_slice_position,
     _merge_slice_pixel_arrays,
 )
 from dicom_numpy.exceptions import DicomImportException
 from .conftest import MockSlice
+
+TEST_DIR = os.path.dirname(__file__)
+TEST_DICOM_ZIP_PATH = os.path.join(TEST_DIR, 'dupe-positions.zip')
+
+
+def getDatasetsFromZip():
+    with TemporaryDirectory() as tempdir:
+        with ZipFile(TEST_DICOM_ZIP_PATH) as test_zip:
+            test_zip.extractall(tempdir)
+            dicom_paths = glob(os.path.join(tempdir, '*.dcm'))
+            return [pydicom.dcmread(p) for p in dicom_paths]
+
+
+class TestSortBySlicePosition:
+    def test_slice_sort_order(self):
+        """
+        Test that no exceptions are raised by the sorting function when
+        datasets with duplicate positions are used.
+        """
+        datasets = getDatasetsFromZip()
+        sort_by_slice_position(datasets)
 
 
 class TestCombineSlices:
