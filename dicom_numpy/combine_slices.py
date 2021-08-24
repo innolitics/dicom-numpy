@@ -90,7 +90,12 @@ def sort_by_slice_position(slice_datasets):
     with the voxels returned from `combine_slices.
     """
     slice_positions = _slice_positions(slice_datasets)
-    return [d for (s, d) in sorted(zip(slice_positions, slice_datasets))]
+    return [
+        d for (s, d) in sorted(
+            zip(slice_positions, slice_datasets),
+            key=lambda v: v[0],
+        )
+    ]
 
 
 def _is_dicomdir(dataset):
