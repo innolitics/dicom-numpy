@@ -3,7 +3,7 @@ from math import isclose
 
 import numpy as np
 
-from .exceptions import DicomImportException
+from .exceptions import DicomImportException, MissingInstanceNumberException
 
 
 logger = logging.getLogger(__name__)
@@ -82,12 +82,44 @@ def combine_slices(datasets, rescale=None, enforce_slice_spacing=True):
     return voxels, transform
 
 
+def sort_datasets(slice_datasets):
+    """
+    Sort datasets using instance number by default, but fall back to slice position.
+    """
+    try:
+        return sort_by_instance_number(slice_datasets)
+    except MissingInstanceNumberException:
+        return sort_by_slice_position(slice_datasets)
+
+
+def sort_by_instance_number(slice_datasets):
+    """
+    Given a list of pydicom Datasets, return the datasets sorted by instance
+    number in the image orientation direction.
+
+    This does not require `pixel_array` to be present, and so may be used to
+    associate instance Datasets with the voxels returned from `combine_slices`.
+    """
+    instance_numbers = [getattr(ds, 'InstanceNumber', None) for ds in slice_datasets]
+    if any(n is None for n in instance_numbers):
+        raise MissingInstanceNumberException
+
+    return [
+        d for (s, d) in sorted(
+            zip(instance_numbers, slice_datasets),
+            key=lambda v: int(v[0]),
+            # Stacked in reverse to order in direction of increasing slice axis
+            reverse=True
+        )
+    ]
+
+
 def sort_by_slice_position(slice_datasets):
     """
     Given a list of pydicom Datasets, return the datasets sorted in the image orientation direction.
 
     This does not require `pixel_array` to be present, and so may be used to associate instance Datasets
-    with the voxels returned from `combine_slices.
+    with the voxels returned from `combine_slices`.
     """
     slice_positions = _slice_positions(slice_datasets)
     return [
@@ -104,7 +136,7 @@ def _is_dicomdir(dataset):
 
 
 def _merge_slice_pixel_arrays(slice_datasets, rescale=None):
-    sorted_slice_datasets = sort_by_slice_position(slice_datasets)
+    sorted_slice_datasets = sort_datasets(slice_datasets)
 
     if rescale is None:
         rescale = any(_requires_rescaling(d) for d in sorted_slice_datasets)
@@ -134,7 +166,7 @@ def _requires_rescaling(dataset):
 
 
 def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
-    first_dataset = sort_by_slice_position(slice_datasets)[0]
+    first_dataset = sort_datasets(slice_datasets)[0]
     image_orientation = first_dataset.ImageOrientationPatient
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
 
@@ -262,8 +294,8 @@ def _check_for_missing_slices(slice_positions):
 
 def _slice_spacing(slice_datasets):
     if len(slice_datasets) > 1:
-        slice_positions = _slice_positions(slice_datasets)
-        slice_positions_diffs = np.diff(sorted(slice_positions))
+        slice_positions = _slice_positions(sort_datasets(slice_datasets))
+        slice_positions_diffs = np.diff(slice_positions)
         return np.median(slice_positions_diffs)
 
     return getattr(slice_datasets[0], 'SpacingBetweenSlices', 0)
