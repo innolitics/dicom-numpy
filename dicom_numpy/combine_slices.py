@@ -9,7 +9,7 @@ from .exceptions import DicomImportException, MissingInstanceNumberException
 logger = logging.getLogger(__name__)
 
 
-def combine_slices(datasets, rescale=None, enforce_slice_spacing=True):
+def combine_slices(datasets, rescale=None, enforce_slice_spacing=True, sort_by_instance=False):
     """
     Given a list of pydicom datasets for an image series, stitch them together into a
     three-dimensional numpy array.  Also calculate a 4x4 affine transformation
@@ -33,6 +33,13 @@ def combine_slices(datasets, rescale=None, enforce_slice_spacing=True):
     `DicomImportException` if there are missing slices detected in the
     datasets. If `enforce_slice_spacing` is set to `False`, missing slices will
     be ignored.
+
+    If `sort_by_instance` is set to `False`, `combine_slices` will sort the
+    image instances by position along the slice axis in increasing order. This
+    is the default for backwards-compatibility reasons. If `True`, the image
+    instances will be sorted according to decreasing `InstanceNumber`. If
+    images in the series do not have an `InstanceNumber` and `sort_by_instance`
+    is `True`, a `MissingInstanceNumberException` will be raised.
 
     The returned array has the column-major byte-order.
 
@@ -74,22 +81,17 @@ def combine_slices(datasets, rescale=None, enforce_slice_spacing=True):
     if len(slice_datasets) == 0:
         raise DicomImportException("Must provide at least one image DICOM dataset")
 
-    _validate_slices_form_uniform_grid(slice_datasets, enforce_slice_spacing=enforce_slice_spacing)
+    if sort_by_instance:
+        sorted_datasets = sort_by_instance_number(slice_datasets)
+    else:
+        sorted_datasets = sort_by_slice_position(slice_datasets)
 
-    voxels = _merge_slice_pixel_arrays(slice_datasets, rescale)
-    transform = _ijk_to_patient_xyz_transform_matrix(slice_datasets)
+    _validate_slices_form_uniform_grid(sorted_datasets, enforce_slice_spacing=enforce_slice_spacing)
+
+    voxels = _merge_slice_pixel_arrays(sorted_datasets, rescale)
+    transform = _ijk_to_patient_xyz_transform_matrix(sorted_datasets)
 
     return voxels, transform
-
-
-def sort_datasets(slice_datasets):
-    """
-    Sort datasets using instance number by default, but fall back to slice position.
-    """
-    try:
-        return sort_by_instance_number(slice_datasets)
-    except MissingInstanceNumberException:
-        return sort_by_slice_position(slice_datasets)
 
 
 def sort_by_instance_number(slice_datasets):
@@ -135,22 +137,20 @@ def _is_dicomdir(dataset):
     return media_sop_class == '1.2.840.10008.1.3.10'
 
 
-def _merge_slice_pixel_arrays(slice_datasets, rescale=None):
-    sorted_slice_datasets = sort_datasets(slice_datasets)
-
+def _merge_slice_pixel_arrays(sorted_datasets, rescale=None):
     if rescale is None:
-        rescale = any(_requires_rescaling(d) for d in sorted_slice_datasets)
+        rescale = any(_requires_rescaling(d) for d in sorted_datasets)
 
-    first_dataset = sorted_slice_datasets[0]
+    first_dataset = sorted_datasets[0]
     slice_dtype = first_dataset.pixel_array.dtype
     slice_shape = first_dataset.pixel_array.T.shape
-    num_slices = len(sorted_slice_datasets)
+    num_slices = len(sorted_datasets)
 
     voxels_shape = slice_shape + (num_slices,)
     voxels_dtype = np.float32 if rescale else slice_dtype
     voxels = np.empty(voxels_shape, dtype=voxels_dtype, order='F')
 
-    for k, dataset in enumerate(sorted_slice_datasets):
+    for k, dataset in enumerate(sorted_datasets):
         pixel_array = dataset.pixel_array.T
         if rescale:
             slope = float(getattr(dataset, 'RescaleSlope', 1))
@@ -165,13 +165,13 @@ def _requires_rescaling(dataset):
     return hasattr(dataset, 'RescaleSlope') or hasattr(dataset, 'RescaleIntercept')
 
 
-def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
-    first_dataset = sort_datasets(slice_datasets)[0]
+def _ijk_to_patient_xyz_transform_matrix(sorted_datasets):
+    first_dataset = sorted_datasets[0]
     image_orientation = first_dataset.ImageOrientationPatient
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
 
     row_spacing, column_spacing = first_dataset.PixelSpacing
-    slice_spacing = _slice_spacing(slice_datasets)
+    slice_spacing = _slice_spacing(sorted_datasets)
 
     transform = np.identity(4, dtype=np.float32)
 
@@ -184,7 +184,7 @@ def _ijk_to_patient_xyz_transform_matrix(slice_datasets):
     return transform
 
 
-def _validate_slices_form_uniform_grid(slice_datasets, enforce_slice_spacing=True):
+def _validate_slices_form_uniform_grid(sorted_datasets, enforce_slice_spacing=True):
     """
     Perform various data checks to ensure that the list of slices form a
     evenly-spaced grid of data. Optionally, this can be slightly relaxed to
@@ -206,13 +206,13 @@ def _validate_slices_form_uniform_grid(slice_datasets, enforce_slice_spacing=Tru
     ]
 
     for property_name in invariant_properties:
-        _slice_attribute_equal(slice_datasets, property_name)
+        _slice_attribute_equal(sorted_datasets, property_name)
 
-    _validate_image_orientation(slice_datasets[0].ImageOrientationPatient)
-    _slice_ndarray_attribute_almost_equal(slice_datasets, 'ImageOrientationPatient', 1e-5)
+    _validate_image_orientation(sorted_datasets[0].ImageOrientationPatient)
+    _slice_ndarray_attribute_almost_equal(sorted_datasets, 'ImageOrientationPatient', 1e-5)
 
     if enforce_slice_spacing:
-        slice_positions = _slice_positions(slice_datasets)
+        slice_positions = _slice_positions(sorted_datasets)
         _check_for_missing_slices(slice_positions)
 
 
@@ -255,18 +255,18 @@ def _extract_cosines(image_orientation):
     return row_cosine, column_cosine, slice_cosine
 
 
-def _slice_attribute_equal(slice_datasets, property_name):
-    initial_value = getattr(slice_datasets[0], property_name, None)
-    for dataset in slice_datasets[1:]:
+def _slice_attribute_equal(sorted_datasets, property_name):
+    initial_value = getattr(sorted_datasets[0], property_name, None)
+    for dataset in sorted_datasets[1:]:
         value = getattr(dataset, property_name, None)
         if value != initial_value:
             msg = f'All slices must have the same value for "{property_name}": {value} != {initial_value}'
             raise DicomImportException(msg)
 
 
-def _slice_ndarray_attribute_almost_equal(slice_datasets, property_name, abs_tol):
-    initial_value = getattr(slice_datasets[0], property_name, None)
-    for dataset in slice_datasets[1:]:
+def _slice_ndarray_attribute_almost_equal(sorted_datasets, property_name, abs_tol):
+    initial_value = getattr(sorted_datasets[0], property_name, None)
+    for dataset in sorted_datasets[1:]:
         value = getattr(dataset, property_name, None)
         if not np.allclose(value, initial_value, atol=abs_tol):
             msg = (f'All slices must have the same value for "{property_name}" within "{abs_tol}": {value} != '
@@ -274,10 +274,10 @@ def _slice_ndarray_attribute_almost_equal(slice_datasets, property_name, abs_tol
             raise DicomImportException(msg)
 
 
-def _slice_positions(slice_datasets):
-    image_orientation = slice_datasets[0].ImageOrientationPatient
+def _slice_positions(sorted_datasets):
+    image_orientation = sorted_datasets[0].ImageOrientationPatient
     row_cosine, column_cosine, slice_cosine = _extract_cosines(image_orientation)
-    return [np.dot(slice_cosine, d.ImagePositionPatient) for d in slice_datasets]
+    return [np.dot(slice_cosine, d.ImagePositionPatient) for d in sorted_datasets]
 
 
 def _check_for_missing_slices(slice_positions):
@@ -292,10 +292,10 @@ def _check_for_missing_slices(slice_positions):
             raise DicomImportException('It appears there are missing slices')
 
 
-def _slice_spacing(slice_datasets):
-    if len(slice_datasets) > 1:
-        slice_positions = _slice_positions(sort_datasets(slice_datasets))
+def _slice_spacing(sorted_datasets):
+    if len(sorted_datasets) > 1:
+        slice_positions = _slice_positions(sorted_datasets)
         slice_positions_diffs = np.diff(slice_positions)
         return np.median(slice_positions_diffs)
 
-    return getattr(slice_datasets[0], 'SpacingBetweenSlices', 0)
+    return getattr(sorted_datasets[0], 'SpacingBetweenSlices', 0)

@@ -11,6 +11,7 @@ import pydicom
 from dicom_numpy.combine_slices import (
     combine_slices,
     sort_by_slice_position,
+    sort_by_instance_number,
     _merge_slice_pixel_arrays,
 )
 from dicom_numpy.exceptions import DicomImportException
@@ -104,16 +105,16 @@ class TestMergeSlicePixelArrays:
     def test_robust_to_ordering(self, axial_slices):
         """
         The DICOM slices should be able to be passed in in any order, and they
-        should be recombined appropriately.
+        should be recombined appropriately using the sort function.
         """
         assert np.array_equal(
-            _merge_slice_pixel_arrays([axial_slices[0], axial_slices[1], axial_slices[2]]),
-            _merge_slice_pixel_arrays([axial_slices[1], axial_slices[0], axial_slices[2]])
+            _merge_slice_pixel_arrays(sort_by_slice_position([axial_slices[0], axial_slices[1], axial_slices[2]])),
+            _merge_slice_pixel_arrays(sort_by_slice_position([axial_slices[1], axial_slices[0], axial_slices[2]]))
         )
 
         assert np.array_equal(
-            _merge_slice_pixel_arrays([axial_slices[0], axial_slices[1], axial_slices[2]]),
-            _merge_slice_pixel_arrays([axial_slices[2], axial_slices[0], axial_slices[1]])
+            _merge_slice_pixel_arrays(sort_by_instance_number([axial_slices[0], axial_slices[1], axial_slices[2]])),
+            _merge_slice_pixel_arrays(sort_by_instance_number([axial_slices[2], axial_slices[0], axial_slices[1]]))
         )
 
     def test_rescales_if_forced_true(self):
