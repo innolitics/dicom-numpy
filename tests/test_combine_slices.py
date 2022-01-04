@@ -14,7 +14,7 @@ from dicom_numpy.combine_slices import (
     sort_by_instance_number,
     _merge_slice_pixel_arrays,
 )
-from dicom_numpy.exceptions import DicomImportException
+from dicom_numpy.exceptions import DicomImportException, MissingInstanceNumberException
 from .conftest import MockSlice
 
 TEST_DIR = os.path.dirname(__file__)
@@ -183,3 +183,37 @@ class TestValidateSlicesFormUniformGrid:
                 [axial_slices[0], axial_slices[1], axial_slices[2]],
                 enforce_slice_spacing=False,
             )
+
+    def test_combine_with_instance_number(self, axial_slices):
+        """
+        Test that a collection of slices can be identically assembled using the
+        slice position or instance number, assuming the instance numbers are
+        ordered sequentially along the slice axis.
+        """
+        instance_sorted_voxels, _ = combine_slices(axial_slices, sort_by_instance=True)
+        position_sorted_voxels, _ = combine_slices(axial_slices)
+        assert np.array_equal(instance_sorted_voxels, position_sorted_voxels)
+
+    def test_instance_combination_fails_when_missing(self, axial_slices_missing_instance_numbers):
+        """
+        Test that an exception is raised when slices are attempted to be sorted
+        by instance number, but some instance numbers are missing.
+        """
+        with pytest.raises(MissingInstanceNumberException):
+            combine_slices(axial_slices_missing_instance_numbers, sort_by_instance=True)
+
+    def test_instance_sorting_with_mixed_positions(self, axial_slices_mixed_instances):
+        """
+        Test that a volume sorts slices by instance number and not by image
+        position patient when instance sorting is selected.
+
+        In practice, series like this tend to be multiple scans with different
+        parameters within a single series, such as in the case of diffusion
+        MRI.
+        """
+        instance_sorted_voxels, _ = combine_slices(axial_slices_mixed_instances, sort_by_instance=True)
+        position_sorted_voxels, _ = combine_slices(axial_slices_mixed_instances)
+        assert np.array_equal(instance_sorted_voxels[:, :, 0], position_sorted_voxels[:, :, 0])
+        assert np.array_equal(instance_sorted_voxels[:, :, 1], position_sorted_voxels[:, :, 3])
+        assert np.array_equal(instance_sorted_voxels[:, :, 2], position_sorted_voxels[:, :, 2])
+        assert np.array_equal(instance_sorted_voxels[:, :, 3], position_sorted_voxels[:, :, 1])
