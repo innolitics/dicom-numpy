@@ -71,6 +71,18 @@ Details
 Change Log
 ==========
 
+Version 0.6.2
+-------------
+- Add a `sort_by_instance` option to `combine_slices`, allowing slices to be
+  sorted in the volume by their instance number rather than slice position.
+  This is useful for series that contain multiple scans over the same physical
+  space, such as diffusion MRI.
+
+Version 0.6.1
+-------------
+- Fix a bug where slice sorting could raise an exception if multiple slices
+  were located at the same slice position.
+
 Version 0.6.0
 -------------
 - Add `enforce_slice_spacing` keyword argument to `combine_slices`, which
