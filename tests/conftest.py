@@ -80,10 +80,10 @@ def axial_slices():
 @pytest.fixture
 def axial_slices_mixed_instances():
     return [
-        MockSlice(randi(*arbitrary_shape), 0, InstanceNumber=3),
-        MockSlice(randi(*arbitrary_shape), 1, InstanceNumber=0),
         MockSlice(randi(*arbitrary_shape), 2, InstanceNumber=1),
+        MockSlice(randi(*arbitrary_shape), 0, InstanceNumber=3),
         MockSlice(randi(*arbitrary_shape), 3, InstanceNumber=2),
+        MockSlice(randi(*arbitrary_shape), 1, InstanceNumber=0),
     ]
 
 

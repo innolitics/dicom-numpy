@@ -217,3 +217,15 @@ class TestValidateSlicesFormUniformGrid:
         assert np.array_equal(instance_sorted_voxels[:, :, 1], position_sorted_voxels[:, :, 3])
         assert np.array_equal(instance_sorted_voxels[:, :, 2], position_sorted_voxels[:, :, 2])
         assert np.array_equal(instance_sorted_voxels[:, :, 3], position_sorted_voxels[:, :, 1])
+
+    def test_skip_sorting(self, axial_slices_mixed_instances):
+        """
+        Test that a volume's slice ordering is not altered when the user
+        specifies `skip_sorting=True`.
+        """
+        position_sorted_voxels, _ = combine_slices(axial_slices_mixed_instances)
+        unsorted_voxels, _ = combine_slices(axial_slices_mixed_instances, skip_sorting=True)
+        assert np.array_equal(unsorted_voxels[:, :, 0], position_sorted_voxels[:, :, 2])
+        assert np.array_equal(unsorted_voxels[:, :, 1], position_sorted_voxels[:, :, 0])
+        assert np.array_equal(unsorted_voxels[:, :, 2], position_sorted_voxels[:, :, 3])
+        assert np.array_equal(unsorted_voxels[:, :, 3], position_sorted_voxels[:, :, 1])
