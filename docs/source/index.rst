@@ -71,6 +71,12 @@ Details
 Change Log
 ==========
 
+Version 0.6.3
+-------------
+
+- Add a `skip_sorting` option to `combine_slices`, allowing slices to be sorted
+  by the user before being passed in to `combine_slices`.
+
 Version 0.6.2
 -------------
 - Add a `sort_by_instance` option to `combine_slices`, allowing slices to be
