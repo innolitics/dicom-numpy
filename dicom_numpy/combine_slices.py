@@ -9,7 +9,7 @@ from .exceptions import DicomImportException, MissingInstanceNumberException
 logger = logging.getLogger(__name__)
 
 
-def combine_slices(datasets, rescale=None, enforce_slice_spacing=True, sort_by_instance=False):
+def combine_slices(datasets, rescale=None, enforce_slice_spacing=True, sort_by_instance=False, skip_sorting=False):
     """
     Given a list of pydicom datasets for an image series, stitch them together into a
     three-dimensional numpy array.  Also calculate a 4x4 affine transformation
@@ -40,6 +40,11 @@ def combine_slices(datasets, rescale=None, enforce_slice_spacing=True, sort_by_i
     instances will be sorted according to decreasing `InstanceNumber`. If
     images in the series do not have an `InstanceNumber` and `sort_by_instance`
     is `True`, a `MissingInstanceNumberException` will be raised.
+
+    If `skip_sorting` is set to `True`, `combine_slices` will not attempt to
+    sort the slices. This can be useful if the volume must be ordered on other
+    tags besides slice position or instance number. This overrides any value
+    passed to `sort_by_instance`.
 
     The returned array has the column-major byte-order.
 
@@ -81,7 +86,9 @@ def combine_slices(datasets, rescale=None, enforce_slice_spacing=True, sort_by_i
     if len(slice_datasets) == 0:
         raise DicomImportException("Must provide at least one image DICOM dataset")
 
-    if sort_by_instance:
+    if skip_sorting:
+        sorted_datasets = slice_datasets
+    elif sort_by_instance:
         sorted_datasets = sort_by_instance_number(slice_datasets)
     else:
         sorted_datasets = sort_by_slice_position(slice_datasets)
