@@ -9,7 +9,14 @@ from .exceptions import DicomImportException, MissingInstanceNumberException
 logger = logging.getLogger(__name__)
 
 
-def combine_slices(datasets, rescale=None, enforce_slice_spacing=True, sort_by_instance=False, skip_sorting=False):
+def combine_slices(
+    datasets,
+    rescale=None,
+    enforce_slice_spacing=True,
+    sort_by_instance=False,
+    skip_sorting=False,
+    c_order_axes=False,
+):
     """
     Given a list of pydicom datasets for an image series, stitch them together into a
     three-dimensional numpy array.  Also calculate a 4x4 affine transformation
@@ -45,6 +52,15 @@ def combine_slices(datasets, rescale=None, enforce_slice_spacing=True, sort_by_i
     sort the slices. This can be useful if the volume must be ordered on other
     tags besides slice position or instance number. This overrides any value
     passed to `sort_by_instance`.
+
+    If `c_order_axes` is set to `True`, the returned array will have its axes
+    returned in the order of `(k, j, i)` rather than `(i, j, k)`. This is done
+    to optimize slice accesses by ensuring that each slice is contiguous in
+    memory. By default, this is done by keeping the axes `(i, j, k)` and storing
+    the array using Fortran ordering. This can cause issues with some serialization
+    libraries that require C-ordering, such as HDF5. In those cases, the axes may
+    be reordered such that slices remain contiguous in memory, but the array is
+    returned in C-ordering.
 
     The returned array has the column-major byte-order.
 
@@ -95,7 +111,7 @@ def combine_slices(datasets, rescale=None, enforce_slice_spacing=True, sort_by_i
 
     _validate_slices_form_uniform_grid(sorted_datasets, enforce_slice_spacing=enforce_slice_spacing)
 
-    voxels = _merge_slice_pixel_arrays(sorted_datasets, rescale)
+    voxels = _merge_slice_pixel_arrays(sorted_datasets, rescale, c_order_axes=c_order_axes)
     transform = _ijk_to_patient_xyz_transform_matrix(sorted_datasets)
 
     return voxels, transform
@@ -144,26 +160,34 @@ def _is_dicomdir(dataset):
     return media_sop_class == '1.2.840.10008.1.3.10'
 
 
-def _merge_slice_pixel_arrays(sorted_datasets, rescale=None):
+def _merge_slice_pixel_arrays(sorted_datasets, rescale=None, c_order_axes=False):
     if rescale is None:
         rescale = any(_requires_rescaling(d) for d in sorted_datasets)
 
     first_dataset = sorted_datasets[0]
     slice_dtype = first_dataset.pixel_array.dtype
-    slice_shape = first_dataset.pixel_array.T.shape
     num_slices = len(sorted_datasets)
-
-    voxels_shape = slice_shape + (num_slices,)
     voxels_dtype = np.float32 if rescale else slice_dtype
-    voxels = np.empty(voxels_shape, dtype=voxels_dtype, order='F')
+
+    if c_order_axes:
+        slice_shape = first_dataset.pixel_array.shape
+        voxels_shape = (num_slices,) + slice_shape
+        voxels = np.empty(voxels_shape, dtype=voxels_dtype)
+    else:
+        slice_shape = first_dataset.pixel_array.T.shape
+        voxels_shape = slice_shape + (num_slices,)
+        voxels = np.empty(voxels_shape, dtype=voxels_dtype, order='F')
 
     for k, dataset in enumerate(sorted_datasets):
-        pixel_array = dataset.pixel_array.T
+        pixel_array = dataset.pixel_array if c_order_axes else dataset.pixel_array.T
         if rescale:
             slope = float(getattr(dataset, 'RescaleSlope', 1))
             intercept = float(getattr(dataset, 'RescaleIntercept', 0))
             pixel_array = pixel_array.astype(np.float32) * slope + intercept
-        voxels[..., k] = pixel_array
+        if c_order_axes:
+            voxels[k, ...] = pixel_array
+        else:
+            voxels[..., k] = pixel_array
 
     return voxels
 
