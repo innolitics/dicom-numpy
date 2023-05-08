@@ -76,7 +76,7 @@ Version 0.6.4
 - Add a `c_order_axes` option to `combine_slices`. When true, this option returns
   a volume with row-major ordering instead of column-major ordering. In order to
   keep slices contiguous in memory, using row-major ordering will reverse the order
-  of the axes; thus, `[i, j, k]` will instead be `[k, j, i]`. This can be useful
+  of the axes; thus, `[j, i, k]` will instead be `[k, i, j]`. This can be useful
   when using the volume with other libraries that expect row-major ordering, such
   as HDF5.
 
