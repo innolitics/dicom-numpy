@@ -127,6 +127,15 @@ class TestMergeSlicePixelArrays:
         voxels = _merge_slice_pixel_arrays(slice_datasets, rescale=False)
         assert voxels.dtype == np.uint8
 
+    def test_c_ordering(self):
+        slices = [
+            MockSlice(np.ones((10, 20), dtype=np.uint8), 0, RescaleSlope=2, RescaleIntercept=3),
+            MockSlice(np.ones((10, 20), dtype=np.uint8), 1, RescaleSlope=2, RescaleIntercept=3),
+        ]
+        voxels = _merge_slice_pixel_arrays(slices, c_order_axes=True)
+        assert voxels.flags.c_contiguous
+        assert voxels.shape == (2, 10, 20)
+
 
 class TestValidateSlicesFormUniformGrid:
     def test_missing_middle_slice_strict(self, axial_slices):
