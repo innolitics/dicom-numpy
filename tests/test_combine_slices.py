@@ -128,12 +128,14 @@ class TestMergeSlicePixelArrays:
         assert voxels.dtype == np.uint8
 
     def test_c_ordering(self):
+        # Note that the shape returned by pydicom's `pixel_array` is [j, i]
         slices = [
             MockSlice(np.ones((10, 20), dtype=np.uint8), 0, RescaleSlope=2, RescaleIntercept=3),
             MockSlice(np.ones((10, 20), dtype=np.uint8), 1, RescaleSlope=2, RescaleIntercept=3),
         ]
         voxels = _merge_slice_pixel_arrays(slices, c_order_axes=True)
         assert voxels.flags.c_contiguous
+        # Assert that the axes order is [k, j, i]
         assert voxels.shape == (2, 10, 20)
 
 

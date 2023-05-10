@@ -71,6 +71,12 @@ Details
 Change Log
 ==========
 
+Version 0.6.5
+-------------
+- Documentation-only release updating incorrect axes labels in the documentation
+  for `combine_slices`. The `c_order_axes` option converts axis orders from
+  `[i, j, k]` to `[k, j, i]`, rather than what was stated in the 0.6.4 documentation.
+
 Version 0.6.4
 -------------
 - Add a `c_order_axes` option to `combine_slices`. When true, this option returns
