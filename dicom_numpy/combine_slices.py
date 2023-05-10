@@ -54,9 +54,9 @@ def combine_slices(
     passed to `sort_by_instance`.
 
     If `c_order_axes` is set to `True`, the returned array will have its axes
-    returned in the order of `(k, i, j)` rather than `(j, i, k)`. This is done
+    returned in the order of `(k, j, i)` rather than `(i, j, k)`. This is done
     to optimize slice accesses by ensuring that each slice is contiguous in
-    memory. By default, this is done by keeping the axes `(j, i, k)` and storing
+    memory. By default, this is done by keeping the axes `(i, j, k)` and storing
     the array using Fortran ordering. This can cause issues with some serialization
     libraries that require C-ordering, such as HDF5. In those cases, the axes may
     be reordered such that slices remain contiguous in memory, but the array is
