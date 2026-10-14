@@ -1,5 +1,6 @@
 import zipfile
 import logging
+import shutil
 import tempfile
 
 import pydicom
@@ -30,15 +31,14 @@ def dicom_datasets_from_zip(zip_file):
         if entry.endswith('/'):
             continue  # skip directories
 
-        entry_pseudo_file = zip_file.open(entry)
-
         # the pseudo file does not support `seek`, which is required by
         # pydicom's lazy loading mechanism; use temporary files to get around this;
         # relies on the temporary files not being removed until the temp
         # file is garbage collected, which should be the case because the
         # pydicom datasets should retain a reference to the temp file
         temp_file = tempfile.TemporaryFile()
-        temp_file.write(entry_pseudo_file.read())
+        with zip_file.open(entry) as entry_pseudo_file:
+            shutil.copyfileobj(entry_pseudo_file, temp_file, length=64 * 1024)
         temp_file.flush()
         temp_file.seek(0)
 
